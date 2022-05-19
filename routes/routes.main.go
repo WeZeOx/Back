@@ -7,8 +7,15 @@ import (
 	"log"
 )
 
+func Welcome(c *fiber.Ctx) error {
+	return c.SendString("Welcome to my API")
+}
+
 func setupRoutes(app *fiber.App) {
 	app.Get("/api", Welcome)
+	app.Get("/api/users", GetUsers)
+	app.Get("/api/:id", GetUser)
+	app.Post("/api/signup", CreateUser)
 }
 
 func Routes() {
