@@ -4,6 +4,7 @@ import (
 	"Forum-Back-End/database"
 	"Forum-Back-End/models"
 	"Forum-Back-End/utils"
+	"encoding/json"
 	"fmt"
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
@@ -13,6 +14,11 @@ import (
 type State struct {
 	Message string
 	Auth    bool
+}
+
+type Login struct {
+	Email    string `json:"email"`
+	Password string `json:"password"`
 }
 
 type User struct {
@@ -44,32 +50,23 @@ func CreateResponseState(message string, auth bool) State {
 	return State{Message: message, Auth: auth}
 }
 
-//func emailTaken(user models.User) bool {
-//
-//}
-
 func CreateUser(c *fiber.Ctx) error {
-	var checkField = []string{"username", "password", "verify_password", "email"}
+	var checkFieldUserArray = []string{"username", "password", "verify_password", "email"}
 	var user models.User
-	var countEmail int64
-	var countUsername int64
-
-	database.Database.Db.Where("email = ?", user.Email).Find(&user).Count(&countEmail)
-	database.Database.Db.Where("username = ?", user.Username).Find(&user).Count(&countUsername)
 
 	if err := c.BodyParser(&user); err != nil {
 		return c.Status(400).JSON(State{Message: "Missing fields", Auth: false})
 	}
-	if !utils.CheckField(user, checkField) {
+	if !utils.CheckFieldUser(user, checkFieldUserArray) {
 		return c.Status(400).JSON(State{Message: "Missing fields", Auth: false})
 	}
 	if user.Password != user.VerifyPassword {
 		return c.Status(400).JSON(State{Message: "Not the same password / verify password", Auth: false})
 	}
-	if countEmail > 0 {
+	if utils.EmailExist(user) {
 		return c.Status(400).JSON(State{Message: "email already exist", Auth: false})
 	}
-	if countUsername > 0 {
+	if utils.UsernameExist(user) {
 		return c.Status(400).JSON(State{Message: "username already exist", Auth: false})
 	}
 
@@ -78,12 +75,11 @@ func CreateUser(c *fiber.Ctx) error {
 
 	user.Password, _ = utils.HashPassword(user.Password)
 	user.VerifyPassword, _ = utils.HashPassword(user.VerifyPassword)
-	user.ID = UUID.String()
 
 	database.Database.Db.Create(&user)
+
 	responseUser := CreateResponseUser(user)
 	responseState := CreateResponseState("OK", true)
-
 	return c.Status(200).JSON(Response{responseUser, responseState})
 }
 
@@ -114,6 +110,39 @@ func GetUser(c *fiber.Ctx) error {
 	return c.Status(200).JSON(responseUser)
 }
 
+func CheckFieldLogin(user Login, array []string) bool {
+	var structArray map[string]interface{}
+	data, _ := json.Marshal(user)
+	json.Unmarshal(data, &structArray)
+
+	for _, item := range array {
+		if structArray[item] == "" || structArray[item] == nil {
+			return false
+		}
+	}
+	return true
+}
+
 func LoginUser(c *fiber.Ctx) error {
-	return c.SendString("login")
+	var login Login
+	var user models.User
+
+	var checkFieldLoginArray = []string{"email", "password"}
+
+	if err := c.BodyParser(&login); err != nil {
+		return c.Status(400).JSON(State{Message: "Missing fields", Auth: false})
+	}
+	if !CheckFieldLogin(login, checkFieldLoginArray) {
+		return c.Status(400).JSON(State{Message: "Missing fields", Auth: false})
+	}
+
+	database.Database.Db.Where("email = ?", login.Email).Find(&user)
+
+	responseState := CreateResponseState("Successfully login", false)
+
+	if utils.CheckPasswordHash(login.Password, user.Password) {
+		return c.JSON(Response{User(user), responseState})
+	}
+
+	return c.Status(400).JSON(State{Message: "Email / Password Incorrect", Auth: false})
 }

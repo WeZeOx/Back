@@ -15,10 +15,10 @@ func setupRoutes(app *fiber.App) {
 	app.Get("/api", Welcome)
 	app.Get("/api/users", GetUsers)
 	app.Get("/api/:id", GetUser)
-
 	app.Post("/api/signup", CreateUser)
-
 	app.Post("/api/signin", LoginUser)
+
+	app.Post("/api/post", CreatePost)
 }
 
 func Routes() {
