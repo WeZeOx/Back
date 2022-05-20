@@ -13,7 +13,6 @@ import (
 type State struct {
 	Message string
 	Auth    bool
-	Token   string
 }
 
 type User struct {
@@ -41,23 +40,37 @@ func CreateResponseUser(user models.User) User {
 	}
 }
 
-func CreateResponseState(message string, auth bool, token string) State {
-	return State{Message: message, Auth: auth, Token: token}
+func CreateResponseState(message string, auth bool) State {
+	return State{Message: message, Auth: auth}
 }
 
-func CreateUser(c *fiber.Ctx) error {
+//func emailTaken(user models.User) bool {
+//
+//}
 
+func CreateUser(c *fiber.Ctx) error {
 	var checkField = []string{"username", "password", "verify_password", "email"}
 	var user models.User
+	var countEmail int64
+	var countUsername int64
+
+	database.Database.Db.Where("email = ?", user.Email).Find(&user).Count(&countEmail)
+	database.Database.Db.Where("username = ?", user.Username).Find(&user).Count(&countUsername)
 
 	if err := c.BodyParser(&user); err != nil {
-		return c.Status(400).JSON(State{Message: "baddd", Auth: false})
+		return c.Status(400).JSON(State{Message: "Missing fields", Auth: false})
 	}
 	if !utils.CheckField(user, checkField) {
-		return c.Status(400).JSON(State{Message: "baddd", Auth: false})
+		return c.Status(400).JSON(State{Message: "Missing fields", Auth: false})
 	}
 	if user.Password != user.VerifyPassword {
-		return c.Status(400).JSON(State{Message: "Pas le meme mdp", Auth: false})
+		return c.Status(400).JSON(State{Message: "Not the same password / verify password", Auth: false})
+	}
+	if countEmail > 0 {
+		return c.Status(400).JSON(State{Message: "email already exist", Auth: false})
+	}
+	if countUsername > 0 {
+		return c.Status(400).JSON(State{Message: "username already exist", Auth: false})
 	}
 
 	var UUID = uuid.New()
@@ -69,7 +82,7 @@ func CreateUser(c *fiber.Ctx) error {
 
 	database.Database.Db.Create(&user)
 	responseUser := CreateResponseUser(user)
-	responseState := CreateResponseState("OK", true, "KO")
+	responseState := CreateResponseState("OK", true)
 
 	return c.Status(200).JSON(Response{responseUser, responseState})
 }
@@ -99,4 +112,8 @@ func GetUser(c *fiber.Ctx) error {
 	}
 	responseUser := CreateResponseUser(user)
 	return c.Status(200).JSON(responseUser)
+}
+
+func LoginUser(c *fiber.Ctx) error {
+	return c.SendString("login")
 }

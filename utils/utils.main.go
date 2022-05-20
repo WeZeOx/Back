@@ -10,6 +10,7 @@ func CheckField(user models.User, array []string) bool {
 	var structArray map[string]interface{}
 	data, _ := json.Marshal(user)
 	json.Unmarshal(data, &structArray)
+
 	for _, item := range array {
 		if structArray[item] == "" || structArray[item] == nil {
 			return false
