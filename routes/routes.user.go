@@ -2,76 +2,70 @@ package routes
 
 import (
 	"Forum-Back-End/database"
-	"Forum-Back-End/models"
+	"Forum-Back-End/structures"
 	"Forum-Back-End/utils"
 	"encoding/json"
-	"fmt"
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
-	"time"
 )
-
-type State struct {
-	Message string
-	Auth    bool
-}
 
 type Login struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`
 }
 
-type User struct {
-	ID             string `json:"id"`
-	CreatedAt      time.Time
-	Username       string `json:"username"`
-	Password       string `json:"password"`
-	VerifyPassword string `json:"verify_password"`
-	Email          string `json:"email"`
-}
-
 type Response struct {
-	User
-	State
+	structures.User
+	structures.State
 }
 
-func CreateResponseUser(user models.User) User {
-	return User{
-		ID:             user.ID,
-		Username:       user.Username,
-		CreatedAt:      user.CreatedAt,
-		Password:       user.Password,
-		VerifyPassword: user.VerifyPassword,
-		Email:          user.Email,
+func CreateResponseUser(user structures.User) structures.User {
+	return structures.User{
+		ID:        user.ID,
+		Username:  user.Username,
+		CreatedAt: user.CreatedAt,
+		Password:  user.Password,
+		Email:     user.Email,
 	}
 }
 
-func CreateResponseState(message string, auth bool) State {
-	return State{Message: message, Auth: auth}
+func CreateResponseUserWithPost(user structures.User, PostArr []structures.Post) structures.User {
+	return structures.User{
+		ID:        user.ID,
+		Username:  user.Username,
+		CreatedAt: user.CreatedAt,
+		Password:  user.Password,
+		Email:     user.Email,
+		Post:      PostArr,
+	}
+}
+
+func CreateResponseState(message string, auth bool, token string) structures.State {
+	return structures.State{Message: message, Auth: auth, Token: token}
 }
 
 func CreateUser(c *fiber.Ctx) error {
+
 	var checkFieldUserArray = []string{"username", "password", "verify_password", "email"}
-	var user models.User
+	var user structures.User
 
 	if err := c.BodyParser(&user); err != nil {
-		return c.Status(400).JSON(State{Message: "Missing fields", Auth: false})
+		return c.Status(fiber.StatusBadRequest).JSON(structures.State{Message: "Missing fields", Auth: false})
 	}
 	if !utils.CheckFieldUser(user, checkFieldUserArray) {
-		return c.Status(400).JSON(State{Message: "Missing fields", Auth: false})
+		return c.Status(fiber.StatusBadRequest).JSON(structures.State{Message: "Missing fields", Auth: false})
 	}
 	if user.Password != user.VerifyPassword {
-		return c.Status(400).JSON(State{Message: "Not the same password / verify password", Auth: false})
+		return c.Status(fiber.StatusBadRequest).JSON(structures.State{Message: "Not the same password / verify password", Auth: false})
 	}
 	if utils.EmailExist(user) {
-		return c.Status(400).JSON(State{Message: "email already exist", Auth: false})
+		return c.Status(fiber.StatusBadRequest).JSON(structures.State{Message: "email already exist", Auth: false})
 	}
 	if utils.UsernameExist(user) {
-		return c.Status(400).JSON(State{Message: "username already exist", Auth: false})
+		return c.Status(fiber.StatusBadRequest).JSON(structures.State{Message: "username already exist", Auth: false})
 	}
 
-	var UUID = uuid.New()
-	user.ID = UUID.String()
+	user.ID = uuid.New().String()
 
 	user.Password, _ = utils.HashPassword(user.Password)
 	user.VerifyPassword, _ = utils.HashPassword(user.VerifyPassword)
@@ -79,41 +73,56 @@ func CreateUser(c *fiber.Ctx) error {
 	database.Database.Db.Create(&user)
 
 	responseUser := CreateResponseUser(user)
-	responseState := CreateResponseState("OK", true)
-	return c.Status(200).JSON(Response{responseUser, responseState})
+
+	token := utils.CreateToken(user)
+	responseState := CreateResponseState("OK", true, token)
+
+	return c.Status(fiber.StatusOK).JSON(Response{responseUser, responseState})
 }
 
 func GetUsers(c *fiber.Ctx) error {
-	var users []models.User
+	var post []structures.Post
+
+	var users []structures.User
+	var responseUsersAndPost []structures.User
+
 	database.Database.Db.Find(&users)
-	var responseUsers []User
+
 	for _, user := range users {
-		responseUser := CreateResponseUser(user)
-		responseUsers = append(responseUsers, responseUser)
+		database.Database.Db.Where("user_id = ?", user.ID).Find(&post)
+		responseUsersAndPost = append(responseUsersAndPost, CreateResponseUserWithPost(user, post))
 	}
-	return c.Status(200).JSON(responseUsers)
+
+	return c.Status(fiber.StatusOK).JSON(responseUsersAndPost)
 }
 
-func findUser(id string, user *models.User) error {
+func findUser(id string, user *structures.User) error {
 	database.Database.Db.Find(&user, "id = ?", id)
-	fmt.Println(nil, "nil")
 	return nil
 }
 
 func GetUser(c *fiber.Ctx) error {
 	id := c.Params("id", "")
-	var user models.User
+	var user structures.User
+	var post []structures.Post
+
 	if err := findUser(id, &user); err != nil {
-		return c.Status(400).JSON(err.Error())
+		return c.Status(fiber.StatusBadRequest).JSON(err.Error())
 	}
-	responseUser := CreateResponseUser(user)
-	return c.Status(200).JSON(responseUser)
+
+	database.Database.Db.Where("user_id = ?", id).Find(&post)
+	response := CreateResponseUserWithPost(user, post)
+
+	return c.Status(fiber.StatusOK).JSON(response)
 }
 
 func CheckFieldLogin(user Login, array []string) bool {
 	var structArray map[string]interface{}
 	data, _ := json.Marshal(user)
-	json.Unmarshal(data, &structArray)
+	err := json.Unmarshal(data, &structArray)
+	if err != nil {
+		return false
+	}
 
 	for _, item := range array {
 		if structArray[item] == "" || structArray[item] == nil {
@@ -125,24 +134,34 @@ func CheckFieldLogin(user Login, array []string) bool {
 
 func LoginUser(c *fiber.Ctx) error {
 	var login Login
-	var user models.User
-
+	var user structures.User
 	var checkFieldLoginArray = []string{"email", "password"}
 
 	if err := c.BodyParser(&login); err != nil {
-		return c.Status(400).JSON(State{Message: "Missing fields", Auth: false})
+		return c.Status(fiber.StatusBadRequest).JSON(structures.State{Message: "Missing fields", Auth: false})
 	}
 	if !CheckFieldLogin(login, checkFieldLoginArray) {
-		return c.Status(400).JSON(State{Message: "Missing fields", Auth: false})
+		return c.Status(fiber.StatusBadRequest).JSON(structures.State{Message: "Missing fields", Auth: false})
 	}
 
 	database.Database.Db.Where("email = ?", login.Email).Find(&user)
 
-	responseState := CreateResponseState("Successfully login", false)
-
 	if utils.CheckPasswordHash(login.Password, user.Password) {
-		return c.JSON(Response{User(user), responseState})
+		token := utils.CreateToken(user)
+
+		return c.JSON(Response{
+			User: structures.User{
+				ID:        user.ID,
+				CreatedAt: user.CreatedAt,
+				Username:  user.Username,
+				Email:     user.Email,
+			},
+			State: structures.State{
+				Message: "Authentified",
+				Auth:    true,
+				Token:   token,
+			}})
 	}
 
-	return c.Status(400).JSON(State{Message: "Email / Password Incorrect", Auth: false})
+	return c.Status(fiber.StatusBadRequest).JSON(structures.State{Message: "Email / Password Incorrect", Auth: false})
 }
