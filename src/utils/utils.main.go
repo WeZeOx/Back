@@ -4,7 +4,6 @@ import (
 	"Forum-Back-End/src/database"
 	"Forum-Back-End/src/dto"
 	"encoding/json"
-	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/joho/godotenv"
 	"golang.org/x/crypto/bcrypt"
@@ -36,6 +35,21 @@ func CheckFieldLogin(user dto.Login, array []string) bool {
 		return false
 	}
 
+	for _, item := range array {
+		if structArray[item] == "" || structArray[item] == nil {
+			return false
+		}
+	}
+	return true
+}
+
+func CheckFieldPost(user dto.Post, array []string) bool {
+	var structArray map[string]interface{}
+	data, _ := json.Marshal(user)
+	err := json.Unmarshal(data, &structArray)
+	if err != nil {
+		return false
+	}
 	for _, item := range array {
 		if structArray[item] == "" || structArray[item] == nil {
 			return false
@@ -85,38 +99,6 @@ func CreateToken(user dto.User) string {
 	t := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	token, _ := t.SignedString(mySigningKey)
 	return token
-}
-
-func CheckToken(c *fiber.Ctx) error {
-	tokenString := c.GetReqHeaders()["Authorization"]
-
-	godotenv.Load(".env")
-	jwtSecret := os.Getenv("JWT_SECRET")
-
-	type Claims struct {
-		ID string `json:"id"`
-		jwt.RegisteredClaims
-	}
-
-	token, err := jwt.ParseWithClaims(tokenString, &Claims{}, func(token *jwt.Token) (interface{}, error) {
-		return []byte(jwtSecret), nil
-	})
-
-	if err != nil {
-		return c.Status(fiber.StatusUnauthorized).JSON(dto.State{
-			Message: "Wrong token",
-			Auth:    false,
-		})
-	}
-
-	if _, ok := token.Claims.(*Claims); ok && token.Valid {
-		return c.Next()
-	} else {
-		return c.Status(fiber.StatusUnauthorized).JSON(dto.State{
-			Message: "Wrong token",
-			Auth:    false,
-		})
-	}
 }
 
 func CreateResponseUserWithPost(user dto.User, PostArr []dto.Post) dto.User {

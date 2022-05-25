@@ -28,6 +28,7 @@ type Post struct {
 	CreatedAt time.Time
 	Content   string `json:"content"`
 	Like      string
+	Dislike   string
 	PostID    string
 }
 
