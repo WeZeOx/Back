@@ -1,4 +1,4 @@
-package structures
+package dto
 
 import "time"
 
@@ -6,6 +6,11 @@ type State struct {
 	Message string
 	Auth    bool
 	Token   string
+}
+
+type Login struct {
+	Email    string `json:"email"`
+	Password string `json:"password"`
 }
 
 type User struct {
@@ -24,4 +29,9 @@ type Post struct {
 	Content   string `json:"content"`
 	Like      string
 	PostID    string
+}
+
+type Response struct {
+	User
+	State
 }

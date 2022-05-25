@@ -1,8 +1,8 @@
 package utils
 
 import (
-	"Forum-Back-End/database"
-	"Forum-Back-End/structures"
+	"Forum-Back-End/src/database"
+	"Forum-Back-End/src/dto"
 	"encoding/json"
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v4"
@@ -12,7 +12,23 @@ import (
 	"time"
 )
 
-func CheckFieldUser(user structures.User, array []string) bool {
+func CheckFieldUser(user dto.User, array []string) bool {
+	var structArray map[string]interface{}
+	data, _ := json.Marshal(user)
+	err := json.Unmarshal(data, &structArray)
+	if err != nil {
+		return false
+	}
+
+	for _, item := range array {
+		if structArray[item] == "" || structArray[item] == nil {
+			return false
+		}
+	}
+	return true
+}
+
+func CheckFieldLogin(user dto.Login, array []string) bool {
 	var structArray map[string]interface{}
 	data, _ := json.Marshal(user)
 	err := json.Unmarshal(data, &structArray)
@@ -38,19 +54,19 @@ func CheckPasswordHash(password, hash string) bool {
 	return err == nil
 }
 
-func EmailExist(user structures.User) bool {
+func EmailExist(user dto.User) bool {
 	var countEmail int64
 	database.Database.Db.Where("email = ?", user.Email).Find(&user).Count(&countEmail)
 	return countEmail > 0
 }
 
-func UsernameExist(user structures.User) bool {
+func UsernameExist(user dto.User) bool {
 	var countUsername int64
 	database.Database.Db.Where("username = ?", user.Username).Find(&user).Count(&countUsername)
 	return countUsername > 0
 }
 
-func CreateToken(user structures.User) string {
+func CreateToken(user dto.User) string {
 	godotenv.Load(".env")
 	jwtSecret := os.Getenv("JWT_SECRET")
 	mySigningKey := []byte(jwtSecret)
@@ -73,6 +89,7 @@ func CreateToken(user structures.User) string {
 
 func CheckToken(c *fiber.Ctx) error {
 	tokenString := c.GetReqHeaders()["Authorization"]
+
 	godotenv.Load(".env")
 	jwtSecret := os.Getenv("JWT_SECRET")
 
@@ -81,16 +98,34 @@ func CheckToken(c *fiber.Ctx) error {
 		jwt.RegisteredClaims
 	}
 
-	token, _ := jwt.ParseWithClaims(tokenString, &Claims{}, func(token *jwt.Token) (interface{}, error) {
+	token, err := jwt.ParseWithClaims(tokenString, &Claims{}, func(token *jwt.Token) (interface{}, error) {
 		return []byte(jwtSecret), nil
 	})
+
+	if err != nil {
+		return c.Status(fiber.StatusUnauthorized).JSON(dto.State{
+			Message: "Wrong token",
+			Auth:    false,
+		})
+	}
 
 	if _, ok := token.Claims.(*Claims); ok && token.Valid {
 		return c.Next()
 	} else {
-		return c.Status(fiber.StatusUnauthorized).JSON(structures.State{
+		return c.Status(fiber.StatusUnauthorized).JSON(dto.State{
 			Message: "Wrong token",
 			Auth:    false,
 		})
+	}
+}
+
+func CreateResponseUserWithPost(user dto.User, PostArr []dto.Post) dto.User {
+	return dto.User{
+		ID:        user.ID,
+		Username:  user.Username,
+		CreatedAt: user.CreatedAt,
+		Password:  user.Password,
+		Email:     user.Email,
+		Post:      PostArr,
 	}
 }

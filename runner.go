@@ -1,7 +1,7 @@
 package main
 
 import (
-	"Forum-Back-End/routes"
+	"Forum-Back-End/src/routes"
 )
 
 func main() {

@@ -1,7 +1,7 @@
 package database
 
 import (
-	"Forum-Back-End/models"
+	"Forum-Back-End/src/models"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"

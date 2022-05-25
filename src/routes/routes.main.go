@@ -1,8 +1,7 @@
 package routes
 
 import (
-	"Forum-Back-End/database"
-	"Forum-Back-End/utils"
+	"Forum-Back-End/src/database"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"log"
@@ -14,14 +13,8 @@ func Welcome(c *fiber.Ctx) error {
 
 func setupRoutes(app *fiber.App) {
 	app.Get("/api", Welcome)
-	app.Post("/api/signup", CreateUser)
-	app.Post("/api/signin", LoginUser)
-
-	app.Get("/api/users", GetUsers)
-
-	app.Get("/api/:id", GetUser)
-
-	app.Post("/api/post", utils.CheckToken, CreatePost)
+	UsersRouters(app.Group("/api/users"))
+	PostsRouters(app.Group("/api/posts"))
 }
 
 func Routes() {
