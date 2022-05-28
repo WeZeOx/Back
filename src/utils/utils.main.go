@@ -3,6 +3,7 @@ package utils
 import (
 	"Forum-Back-End/src/database"
 	"Forum-Back-End/src/dto"
+	"Forum-Back-End/src/models"
 	"encoding/json"
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/joho/godotenv"
@@ -101,13 +102,12 @@ func CreateToken(user dto.User) string {
 	return token
 }
 
-func CreateResponseUserWithPost(user dto.User, PostArr []dto.Post) dto.User {
-	return dto.User{
-		ID:        user.ID,
-		Username:  user.Username,
-		CreatedAt: user.CreatedAt,
-		Password:  user.Password,
-		Email:     user.Email,
-		Post:      PostArr,
+func CreateDbUser(userData dto.User) models.User {
+	return models.User{
+		ID:        userData.ID,
+		CreatedAt: userData.CreatedAt,
+		Username:  userData.Username,
+		Password:  userData.Password,
+		Email:     userData.Email,
 	}
 }
