@@ -44,7 +44,6 @@ func CheckToken(c *fiber.Ctx) error {
 func CheckFieldCreatePost(c *fiber.Ctx) error {
 	var checkFieldPostArray = []string{"id", "content"}
 	var post dto.Post
-
 	err := c.BodyParser(&post)
 
 	if (err != nil) ||

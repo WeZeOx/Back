@@ -8,32 +8,13 @@ import (
 )
 
 func GetPosts(c *fiber.Ctx) error {
-	var responsePostUser []fiber.Map
-	var posts []dto.Post
-	posts = service.FindPosts(posts)
-
-	for _, post := range posts {
-		var user dto.User
-		user = service.GetUserById(post.UserID, user)
-
-		responsePostUser = append(responsePostUser, fiber.Map{
-			"user": dto.ResponseUser{
-				ID:        user.ID,
-				CreatedAt: user.CreatedAt,
-				Username:  user.Username,
-				Email:     user.Email,
-			},
-			"post": post,
-		})
-	}
-	return c.Status(fiber.StatusOK).JSON(responsePostUser)
+	posts := service.FindPosts()
+	return c.Status(fiber.StatusOK).JSON(posts)
 }
 
 func CreatePost(c *fiber.Ctx) error {
 	postData := c.Locals("post").(dto.Post)
 	postData.CreatedAt = time.Now()
-
 	service.CreatePost(postData)
-
 	return c.JSON(fiber.Map{"post": postData})
 }
