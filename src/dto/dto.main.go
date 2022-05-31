@@ -1,6 +1,10 @@
 package dto
 
-import "time"
+import (
+	"Forum-Back-End/src/models"
+	"github.com/golang-jwt/jwt/v4"
+	"time"
+)
 
 type State struct {
 	Message string `json:"message"`
@@ -11,6 +15,12 @@ type State struct {
 type Login struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`
+}
+
+type Claims struct {
+	ID      string `json:"id"`
+	IsAdmin bool   `json:"is_admin"`
+	jwt.RegisteredClaims
 }
 
 type User struct {
@@ -31,20 +41,24 @@ type ResponseUser struct {
 }
 
 type ResponsePostUser struct {
-	Username              string    `json:"username"`
-	PasswordButINotWantIt string    `json:"password"`
-	CreatedAt             time.Time `json:"created_at"`
-	Email                 string    `json:"email"`
-	PostButINotWantIt     string    `json:"post"`
-	Content               string    `json:"content"`
-	Like                  string    `json:"like"`
-	Dislike               string    `json:"dislike"`
-	PostID                string    `json:"post_id"`
+	ID string `json:"id"`
+	models.User
+	models.Post
+}
+
+type PostUserResponseForFront struct {
+	ID        string    `json:"id"`
+	CreatedAt time.Time `json:"created_at"`
+	Username  string    `json:"username"`
+	Content   string    `json:"content"`
+	Like      string    `json:"like"`
+	PostID    string    `json:"post_id"`
+	Admin     bool      `json:"admin"`
 }
 
 type Post struct {
 	UserID    string    `json:"id"`
-	CreatedAt time.Time `json:"created_at"`
+	CreatedAt time.Time `json:"created_at_post"`
 	Content   string    `json:"content"`
 	Like      string    `json:"like"`
 	Dislike   string    `json:"dislike"`

@@ -21,6 +21,12 @@ func GetUserByEmail(login dto.Login) dto.User {
 	return user
 }
 
+func GetAdminUserByEmail(email string) dto.User {
+	var user dto.User
+	database.Database.Db.Where("email = ?", email).Find(&user)
+	return user
+}
+
 func GetUserById(id string, user dto.User) dto.User {
 	database.Database.Db.Find(&user, "id = ?", id)
 	return user

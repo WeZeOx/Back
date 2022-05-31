@@ -5,6 +5,8 @@ import (
 	"Forum-Back-End/src/service"
 	"Forum-Back-End/src/utils"
 	"github.com/gofiber/fiber/v2"
+	"github.com/joho/godotenv"
+	"os"
 )
 
 func CreateUser(c *fiber.Ctx) error {
@@ -12,7 +14,7 @@ func CreateUser(c *fiber.Ctx) error {
 	user := utils.CreateDbUser(userData)
 
 	service.CreateUser(user)
-	token := utils.CreateToken(userData)
+	token := utils.CreateToken(userData, false)
 
 	return c.Status(200).JSON(fiber.Map{
 		"user": dto.ResponseUser{
@@ -29,12 +31,34 @@ func CreateUser(c *fiber.Ctx) error {
 }
 
 func LoginUser(c *fiber.Ctx) error {
+	godotenv.Load(".env")
 	userData := c.Locals("user").(dto.Login)
 	userToLogin := service.GetUserByEmail(userData)
 	user := utils.CreateDbUser(userToLogin)
+	ADMIN_EMAIL := os.Getenv("ADMIN_EMAIL")
+	ADMIN_PASSWORD := os.Getenv("ADMIN_PASSWORD")
+
+	if utils.CheckPasswordHash(userData.Password, userToLogin.Password) &&
+		userData.Password == ADMIN_PASSWORD &&
+		userData.Email == ADMIN_EMAIL {
+		token := utils.CreateToken(userToLogin, true)
+
+		return c.Status(200).JSON(fiber.Map{
+			"user": dto.ResponseUser{
+				ID:        user.ID,
+				CreatedAt: user.CreatedAt,
+				Username:  user.Username,
+				Email:     user.Email,
+			},
+			"state": dto.State{
+				Message: "Authorized",
+				Auth:    true,
+				Token:   token,
+			}})
+	}
 
 	if utils.CheckPasswordHash(userData.Password, userToLogin.Password) {
-		token := utils.CreateToken(userToLogin)
+		token := utils.CreateToken(userToLogin, false)
 
 		return c.Status(200).JSON(fiber.Map{
 			"user": dto.ResponseUser{

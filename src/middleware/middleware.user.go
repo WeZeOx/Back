@@ -3,7 +3,6 @@ package middleware
 import (
 	"Forum-Back-End/src/dto"
 	"Forum-Back-End/src/utils"
-	"fmt"
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
 )
@@ -27,7 +26,6 @@ func CheckFieldCreateUser(c *fiber.Ctx) error {
 }
 
 func CheckFieldLogin(c *fiber.Ctx) error {
-	fmt.Println("here")
 	var checkFieldLoginArray = []string{"email", "password"}
 	var login dto.Login
 	err := c.BodyParser(&login)
