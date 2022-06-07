@@ -25,6 +25,10 @@ func Routes() {
 	app := fiber.New()
 	app.Use(cors.New())
 
+	app.Post("/test", func(c *fiber.Ctx) error {
+		return c.SendString("la")
+	})
+
 	setupRoutes(app)
 	utils.AccountAdminExist()
 

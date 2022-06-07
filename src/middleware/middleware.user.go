@@ -11,11 +11,16 @@ func CheckFieldCreateUser(c *fiber.Ctx) error {
 	var checkFieldUserArray = []string{"username", "password", "verify_password", "email"}
 	var user dto.User
 	err := c.BodyParser(&user)
+
+	if utils.EmailExist(user) {
+		return c.Status(fiber.StatusBadRequest).JSON(dto.State{Message: "Email already taken", Auth: false})
+	}
+	if utils.UsernameExist(user) {
+		return c.Status(fiber.StatusBadRequest).JSON(dto.State{Message: "Username already taken", Auth: false})
+	}
 	if (err != nil) ||
 		(!utils.CheckFieldUser(user, checkFieldUserArray)) ||
-		(user.Password != user.VerifyPassword) ||
-		(utils.EmailExist(user)) ||
-		(utils.UsernameExist(user)) {
+		(user.Password != user.VerifyPassword) {
 		return c.Status(fiber.StatusBadRequest).JSON(dto.State{Message: "Please check your connexions fields", Auth: false})
 	}
 	user.ID = uuid.New().String()

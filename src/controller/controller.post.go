@@ -4,7 +4,6 @@ import (
 	"Forum-Back-End/src/dto"
 	"Forum-Back-End/src/service"
 	"Forum-Back-End/src/utils"
-	"encoding/json"
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/joho/godotenv"
@@ -27,18 +26,12 @@ func GetPosts(c *fiber.Ctx) error {
 }
 
 func CreatePost(c *fiber.Ctx) error {
-
 	postData := c.Locals("post").(dto.Post)
 	token := c.Locals("token").(*jwt.Token)
 	postData.CreatedAt = time.Now()
 
-	var structArray map[string]string
-	data, _ := json.Marshal(&token)
-	_ = json.Unmarshal(data, &structArray)
-
 	claims, _ := token.Claims.(*dto.Claims)
-
-	godotenv.Load(".env")
+	_ = godotenv.Load(".env")
 	service.CreatePost(postData)
 
 	return c.JSON(fiber.Map{"post": postData, "admin": claims.IsAdmin})

@@ -37,7 +37,6 @@ type ResponseUser struct {
 	ID        string    `json:"id"`
 	CreatedAt time.Time `json:"created_at"`
 	Username  string    `json:"username"`
-	Email     string    `json:"email"`
 }
 
 type ResponsePostUser struct {
@@ -53,6 +52,7 @@ type PostUserResponseForFront struct {
 	Content   string    `json:"content"`
 	Like      string    `json:"like"`
 	PostID    string    `json:"post_id"`
+	Category  string    `json:"category"`
 	Admin     bool      `json:"admin"`
 }
 
@@ -62,6 +62,7 @@ type Post struct {
 	Content   string    `json:"content"`
 	Like      string    `json:"like"`
 	Dislike   string    `json:"dislike"`
+	Category  string    `json:"category"`
 	PostID    string    `json:"post_id"`
 }
 

@@ -23,6 +23,7 @@ func CreateUserPostResponse(postData dto.ResponsePostUser, isAdmin bool) dto.Pos
 		Content:   postData.Content,
 		Like:      postData.Like,
 		PostID:    postData.PostID,
+		Category:  postData.Post.Category,
 		Admin:     isAdmin,
 	}
 }

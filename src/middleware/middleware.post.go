@@ -16,8 +16,6 @@ func CheckToken(c *fiber.Ctx) error {
 	godotenv.Load(".env")
 	jwtSecret := os.Getenv("JWT_SECRET")
 
-	fmt.Println(tokenString)
-
 	token, err := jwt.ParseWithClaims(tokenString, &dto.Claims{}, func(token *jwt.Token) (interface{}, error) {
 		return []byte(jwtSecret), nil
 	})
@@ -44,6 +42,9 @@ func CheckFieldCreatePost(c *fiber.Ctx) error {
 	var checkFieldPostArray = []string{"id", "content"}
 	var post dto.Post
 	err := c.BodyParser(&post)
+
+	fmt.Println(post)
+
 	if (err != nil) ||
 		!utils.CheckFieldPost(post, checkFieldPostArray) {
 		return c.Status(fiber.StatusBadRequest).JSON(dto.State{

@@ -16,7 +16,9 @@ type DbInstance struct {
 var Database DbInstance
 
 func ConnectDb() {
-	db, err := gorm.Open(sqlite.Open("api.db"), &gorm.Config{})
+	db, err := gorm.Open(sqlite.Open("api.db"), &gorm.Config{
+		DisableForeignKeyConstraintWhenMigrating: true,
+	})
 
 	if err != nil {
 		log.Fatal("Failed to connect to the database! \n", err)

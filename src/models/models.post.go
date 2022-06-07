@@ -7,6 +7,6 @@ type Post struct {
 	CreatedAt time.Time `json:"created_at"`
 	Content   string    `json:"content"`
 	Like      string    `json:"like"`
-	Dislike   string    `json:"dislike"`
+	Category  string    `json:"category"`
 	PostID    string    `json:"post_id"`
 }

@@ -5,6 +5,7 @@ import (
 	"Forum-Back-End/src/service"
 	"Forum-Back-End/src/utils"
 	"github.com/gofiber/fiber/v2"
+	"github.com/golang-jwt/jwt/v4"
 	"github.com/joho/godotenv"
 	"os"
 )
@@ -21,7 +22,6 @@ func CreateUser(c *fiber.Ctx) error {
 			ID:        user.ID,
 			CreatedAt: user.CreatedAt,
 			Username:  user.Username,
-			Email:     user.Email,
 		},
 		"state": dto.State{
 			Message: "Authorized",
@@ -48,7 +48,6 @@ func LoginUser(c *fiber.Ctx) error {
 				ID:        user.ID,
 				CreatedAt: user.CreatedAt,
 				Username:  user.Username,
-				Email:     user.Email,
 			},
 			"state": dto.State{
 				Message: "Authorized",
@@ -65,7 +64,6 @@ func LoginUser(c *fiber.Ctx) error {
 				ID:        user.ID,
 				CreatedAt: user.CreatedAt,
 				Username:  user.Username,
-				Email:     user.Email,
 			},
 			"state": dto.State{
 				Message: "Authorized",
@@ -90,7 +88,6 @@ func GetUsers(c *fiber.Ctx) error {
 				ID:        user.ID,
 				CreatedAt: user.CreatedAt,
 				Username:  user.Username,
-				Email:     user.Email,
 			},
 			"post": posts,
 		})
@@ -99,10 +96,14 @@ func GetUsers(c *fiber.Ctx) error {
 }
 
 func GetUser(c *fiber.Ctx) error {
+	godotenv.Load(".env")
+	ADMIN_EMAIL := os.Getenv("ADMIN_EMAIL")
+
 	id := c.Params("id", "")
 	var user dto.User
 	var post []dto.Post
 
+	userAdmin := service.GetAdminUserByEmail(ADMIN_EMAIL)
 	user = service.GetUserById(id, user)
 	post = service.GetPostById(user.ID, post)
 
@@ -112,7 +113,23 @@ func GetUser(c *fiber.Ctx) error {
 			ID:        user.ID,
 			CreatedAt: user.CreatedAt,
 			Username:  user.Username,
-			Email:     user.Email,
 		},
+		"admin": user.ID == userAdmin.ID,
 	})
+}
+
+func UserIsAdmin(c *fiber.Ctx) error {
+	tokenString := c.GetReqHeaders()["Authorization"]
+	godotenv.Load(".env")
+	jwtSecret := os.Getenv("JWT_SECRET")
+
+	token, err := jwt.ParseWithClaims(tokenString, &dto.Claims{}, func(token *jwt.Token) (interface{}, error) {
+		return []byte(jwtSecret), nil
+	})
+	if err != nil {
+		return c.JSON(fiber.Map{"isAdmin": false})
+	}
+
+	cls, _ := token.Claims.(*dto.Claims)
+	return c.JSON(fiber.Map{"isAdmin": cls.IsAdmin})
 }
