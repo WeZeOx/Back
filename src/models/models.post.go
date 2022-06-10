@@ -4,9 +4,10 @@ import "time"
 
 type Post struct {
 	UserID    string    `json:"id"`
-	CreatedAt time.Time `json:"created_at"`
 	Content   string    `json:"content"`
+	CreatedAt time.Time `json:"created_at"`
 	Like      string    `json:"like"`
-	Category  string    `json:"category"`
+	Dislike   string    `json:"dislike"`
 	PostID    string    `json:"post_id"`
+	Category  string    `json:"category"`
 }

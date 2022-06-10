@@ -3,6 +3,7 @@ package middleware
 import (
 	"Forum-Back-End/src/dto"
 	"Forum-Back-End/src/utils"
+	"encoding/json"
 	"fmt"
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v4"
@@ -10,6 +11,25 @@ import (
 	"github.com/joho/godotenv"
 	"os"
 )
+
+func DecodeToken(c *fiber.Ctx) error {
+	tokenHeader := c.Locals("token").(*jwt.Token)
+	godotenv.Load(".env")
+	jwtSecret := os.Getenv("JWT_SECRET")
+
+	var AccessToken map[string]string
+	stringify, _ := json.Marshal(&tokenHeader)
+	json.Unmarshal(stringify, &AccessToken)
+
+	token, _ := jwt.ParseWithClaims(AccessToken["Raw"], &dto.Claims{}, func(token *jwt.Token) (interface{}, error) {
+		return []byte(jwtSecret), nil
+	})
+
+	decodedToken := token.Claims.(*dto.Claims)
+	c.Locals("decodedToken", decodedToken)
+
+	return c.Next()
+}
 
 func CheckToken(c *fiber.Ctx) error {
 	tokenString := c.GetReqHeaders()["Authorization"]

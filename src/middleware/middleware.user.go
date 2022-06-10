@@ -5,13 +5,18 @@ import (
 	"Forum-Back-End/src/utils"
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
+	"regexp"
 )
 
 func CheckFieldCreateUser(c *fiber.Ctx) error {
 	var checkFieldUserArray = []string{"username", "password", "verify_password", "email"}
 	var user dto.User
 	err := c.BodyParser(&user)
+	emailRegex := regexp.MustCompile(`^[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,4}$`)
 
+	if !emailRegex.MatchString(user.Email) {
+		return c.Status(fiber.StatusBadRequest).JSON(dto.State{Message: "Your email must be valid", Auth: false})
+	}
 	if utils.EmailExist(user) {
 		return c.Status(fiber.StatusBadRequest).JSON(dto.State{Message: "Email already taken", Auth: false})
 	}

@@ -17,13 +17,13 @@ func CreateDbUser(userData dto.User) models.User {
 
 func CreateUserPostResponse(postData dto.ResponsePostUser, isAdmin bool) dto.PostUserResponseForFront {
 	return dto.PostUserResponseForFront{
-		ID:        postData.Post.UserID,
-		CreatedAt: postData.User.CreatedAt,
-		Username:  postData.Username,
-		Content:   postData.Content,
-		Like:      postData.Like,
-		PostID:    postData.PostID,
-		Category:  postData.Post.Category,
-		Admin:     isAdmin,
+		UserID:     postData.Post.UserID,
+		CreatedAt:  postData.User.CreatedAt,
+		Username:   postData.Username,
+		Content:    postData.Content,
+		Like:       postData.Like,
+		PostID:     postData.PostID,
+		Categories: postData.Post.Category,
+		Admin:      isAdmin,
 	}
 }

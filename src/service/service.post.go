@@ -5,7 +5,7 @@ import (
 	"Forum-Back-End/src/dto"
 )
 
-func CreatePost(post dto.Post) {
+func CreateDbPost(post dto.Post) {
 	database.Database.Db.Create(&post)
 }
 
@@ -18,4 +18,13 @@ func FindPosts() []dto.ResponsePostUser {
 func GetPostById(id string, post []dto.Post) []dto.Post {
 	database.Database.Db.Find(&post, "user_id = ?", id)
 	return post
+}
+
+func GetPostByPostId(id string, post dto.Post) dto.Post {
+	database.Database.Db.Find(&post, "post_id = ?", id)
+	return post
+}
+
+func DeletePost(post dto.Post) {
+	database.Database.Db.Where("post_id = ?", post.PostID).Delete(&post)
 }
