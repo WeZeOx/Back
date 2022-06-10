@@ -32,3 +32,12 @@ func DeletePost(post dto.Post) {
 func UpdateColumnLike(post dto.Post) {
 	database.Database.Db.Where("post_id = ?", post.PostID).Save(&post)
 }
+
+func GetCountCommentByPost() []int {
+	var countResult []int
+	database.Database.Db.Table("posts p").Joins("LEFT JOIN comments c on p.post_id = c.post_id").Group("p.post_id").Select("count(c.post_id)").Order("p.created_at DESC").Scan(&countResult)
+	for i, j := 0, len(countResult)-1; i < j; i, j = i+1, j-1 {
+		countResult[i], countResult[j] = countResult[j], countResult[i]
+	}
+	return countResult
+}

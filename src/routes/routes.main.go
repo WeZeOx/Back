@@ -2,7 +2,9 @@ package routes
 
 import (
 	"Forum-Back-End/src/database"
+	"Forum-Back-End/src/service"
 	"Forum-Back-End/src/utils"
+	"fmt"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"log"
@@ -26,6 +28,8 @@ func Routes() {
 	app.Use(cors.New())
 
 	app.Get("/test", func(c *fiber.Ctx) error {
+		fmt.Println("la")
+		service.GetCountCommentByPost()
 		return c.SendString("ma")
 	})
 

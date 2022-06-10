@@ -18,10 +18,11 @@ func GetPosts(c *fiber.Ctx) error {
 	_ = godotenv.Load(".env")
 	ADMIN_EMAIL := os.Getenv("ADMIN_EMAIL")
 	adminSchema := service.GetAdminUserByEmail(ADMIN_EMAIL)
+	arrCom := service.GetCountCommentByPost()
 
-	for _, post := range posts {
+	for idx, post := range posts {
 		isAdmin := adminSchema.ID == post.Post.UserID
-		res = append(res, utils.CreateUserPostResponse(post, isAdmin))
+		res = append(res, utils.CreateUserPostResponse(post, isAdmin, arrCom[idx]))
 	}
 	return c.Status(fiber.StatusOK).JSON(res)
 }

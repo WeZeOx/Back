@@ -46,14 +46,15 @@ type ResponsePostUser struct {
 }
 
 type PostUserResponseForFront struct {
-	UserID     string    `json:"user_id"`
-	CreatedAt  time.Time `json:"created_at"`
-	Username   string    `json:"username"`
-	Content    string    `json:"content"`
-	Like       string    `json:"like"`
-	PostID     string    `json:"post_id"`
-	Categories string    `json:"categories"`
-	Admin      bool      `json:"admin"`
+	UserID       string    `json:"user_id"`
+	CreatedAt    time.Time `json:"created_at"`
+	Username     string    `json:"username"`
+	Content      string    `json:"content"`
+	Like         string    `json:"like"`
+	PostID       string    `json:"post_id"`
+	Categories   string    `json:"categories"`
+	Admin        bool      `json:"admin"`
+	NumberOfPost int       `json:"number_of_post"`
 }
 
 type Post struct {
