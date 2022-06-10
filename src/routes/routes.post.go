@@ -9,10 +9,8 @@ import (
 func PostsRouters(router fiber.Router) {
 	router.Get("/all", controller.GetPosts)
 	router.Post("/createpost", middleware.CheckToken, middleware.CheckFieldCreatePost, controller.CreatePost)
-
 	router.Patch("/unlike/:postId", middleware.CheckToken, middleware.DecodeToken, controller.UnlikePost)
-
 	router.Patch("/like/:postId", middleware.CheckToken, middleware.DecodeToken, controller.LikePost)
-
-	router.Delete("/deletepost/:postid", middleware.CheckToken, controller.DeletePost)
+	router.Get("/getpost/:postId", controller.GetSinglePost)
+	router.Delete("/deletepost/:postId", middleware.CheckToken, controller.DeletePost)
 }

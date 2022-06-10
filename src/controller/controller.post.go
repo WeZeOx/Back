@@ -43,7 +43,7 @@ func CreatePost(c *fiber.Ctx) error {
 
 func DeletePost(c *fiber.Ctx) error {
 	var post dto.Post
-	post.PostID = c.Params("postid")
+	post.PostID = c.Params("postId")
 	service.DeletePost(post)
 
 	return c.JSON(fiber.Map{
@@ -83,4 +83,23 @@ func LikePost(c *fiber.Ctx) error {
 	service.UpdateColumnLike(post)
 
 	return c.JSON(post)
+}
+
+func GetSinglePost(c *fiber.Ctx) error {
+	var post dto.Post
+	postId := c.Params("postId")
+	post = service.GetPostByPostId(postId, post)
+
+	if post.PostID == "" {
+		return c.JSON(dto.State{
+			Message: "Post does not exist",
+			Auth:    false,
+			Token:   "",
+		})
+	} else {
+
+		res := service.GetPostWithComments(postId)
+
+		return c.JSON(res)
+	}
 }

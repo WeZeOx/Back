@@ -82,7 +82,7 @@ func GetUsers(c *fiber.Ctx) error {
 	users = service.FindUsers(users)
 
 	for _, user := range users {
-		posts = service.GetPostById(user.ID, posts)
+		posts = service.GetPostByUserId(user.ID, posts)
 		responseUsersAndPost = append(responseUsersAndPost, fiber.Map{
 			"user": dto.ResponseUser{
 				ID:        user.ID,
@@ -105,7 +105,7 @@ func GetUser(c *fiber.Ctx) error {
 
 	userAdmin := service.GetAdminUserByEmail(ADMIN_EMAIL)
 	user = service.GetUserById(id, user)
-	post = service.GetPostById(user.ID, post)
+	post = service.GetPostByUserId(user.ID, post)
 
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
 		"post": post,

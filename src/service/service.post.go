@@ -3,6 +3,7 @@ package service
 import (
 	"Forum-Back-End/src/database"
 	"Forum-Back-End/src/dto"
+	"time"
 )
 
 func CreateDbPost(post dto.Post) {
@@ -15,7 +16,7 @@ func FindPosts() []dto.ResponsePostUser {
 	return res
 }
 
-func GetPostById(id string, post []dto.Post) []dto.Post {
+func GetPostByUserId(id string, post []dto.Post) []dto.Post {
 	database.Database.Db.Find(&post, "user_id = ?", id)
 	return post
 }
@@ -40,4 +41,31 @@ func GetCountCommentByPost() []int {
 		countResult[i], countResult[j] = countResult[j], countResult[i]
 	}
 	return countResult
+}
+
+type test struct {
+	PostId           string    `json:"post_id"`
+	UserId           string    `json:"user_id"`
+	CommentId        string    `json:"comment_id"`
+	CreatedAtComment time.Time `json:"created_at_comment"`
+	ContentComment   string    `json:"content_comment"`
+	UserID           string    `json:"id"`
+	Content          string    `json:"content"`
+	CreatedAtPost    time.Time `json:"created_at_post"`
+	Like             string    `json:"like"`
+	Dislike          string    `json:"dislike"`
+	PostID           string    `json:"post_id_post"`
+	Category         string    `json:"category"`
+	ID               string    `json:"user_id_user"`
+	CreatedAtUser    time.Time `json:"created_at_user"`
+	Username         string    `json:"username" gorm:"unique"`
+	Password         string    `json:"password"`
+	Email            string    `json:"email" gorm:"unique"`
+}
+
+func GetPostWithComments(postId string) []test {
+	var test2 []test
+
+	database.Database.Db.Table("comments c").Select("*").Joins("join posts p on c.post_id = p.post_id join users u on u.id = c.user_id").Where("c.post_id = ?", postId).Scan(&test2)
+	return test2
 }
