@@ -1,11 +1,9 @@
 package controller
 
 import (
-	"Forum-Back-End/src/database"
 	"Forum-Back-End/src/dto"
 	"Forum-Back-End/src/service"
 	"Forum-Back-End/src/utils"
-	"fmt"
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/joho/godotenv"
@@ -17,7 +15,7 @@ import (
 func GetPosts(c *fiber.Ctx) error {
 	posts := service.FindPosts()
 	var res []dto.PostUserResponseForFront
-	godotenv.Load(".env")
+	_ = godotenv.Load(".env")
 	ADMIN_EMAIL := os.Getenv("ADMIN_EMAIL")
 	adminSchema := service.GetAdminUserByEmail(ADMIN_EMAIL)
 
@@ -62,17 +60,26 @@ func UnlikePost(c *fiber.Ctx) error {
 	newLikeColumn := ""
 	userWhoLikeArr := strings.Split(post.Like, ",")
 
-	for idx, id := range userWhoLikeArr {
-		if id != userId && idx == 0 {
-			newLikeColumn += id
-		} else if id != userId {
+	for _, id := range userWhoLikeArr {
+		if id != userId {
 			newLikeColumn += id + ","
 		}
 	}
-
+	newLikeColumn = newLikeColumn[:len(newLikeColumn)-1]
 	post.Like = newLikeColumn
-	database.Database.Db.Where("post_id = ?", post.PostID).Save(&post)
+	service.UpdateColumnLike(post)
 
-	fmt.Println(newLikeColumn)
+	return c.JSON(post)
+}
+
+func LikePost(c *fiber.Ctx) error {
+	var post dto.Post
+	postId := c.Params("postId")
+	decodedToken := c.Locals("decodedToken").(*dto.Claims)
+	post = service.GetPostByPostId(postId, post)
+	userId := decodedToken.ID
+	post.Like += userId + ","
+	service.UpdateColumnLike(post)
+
 	return c.JSON(post)
 }

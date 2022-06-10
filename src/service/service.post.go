@@ -28,3 +28,7 @@ func GetPostByPostId(id string, post dto.Post) dto.Post {
 func DeletePost(post dto.Post) {
 	database.Database.Db.Where("post_id = ?", post.PostID).Delete(&post)
 }
+
+func UpdateColumnLike(post dto.Post) {
+	database.Database.Db.Where("post_id = ?", post.PostID).Save(&post)
+}

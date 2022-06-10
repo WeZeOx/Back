@@ -12,7 +12,7 @@ func PostsRouters(router fiber.Router) {
 
 	router.Patch("/unlike/:postId", middleware.CheckToken, middleware.DecodeToken, controller.UnlikePost)
 
-	router.Patch("/like/:postId", middleware.CheckToken, middleware.DecodeToken, controller.UnlikePost)
+	router.Patch("/like/:postId", middleware.CheckToken, middleware.DecodeToken, controller.LikePost)
 
 	router.Delete("/deletepost/:postid", middleware.CheckToken, controller.DeletePost)
 }

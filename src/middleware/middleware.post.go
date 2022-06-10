@@ -33,7 +33,7 @@ func DecodeToken(c *fiber.Ctx) error {
 
 func CheckToken(c *fiber.Ctx) error {
 	tokenString := c.GetReqHeaders()["Authorization"]
-	godotenv.Load(".env")
+	_ = godotenv.Load(".env")
 	jwtSecret := os.Getenv("JWT_SECRET")
 
 	token, err := jwt.ParseWithClaims(tokenString, &dto.Claims{}, func(token *jwt.Token) (interface{}, error) {
