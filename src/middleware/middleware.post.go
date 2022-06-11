@@ -4,7 +4,6 @@ import (
 	"Forum-Back-End/src/dto"
 	"Forum-Back-End/src/utils"
 	"encoding/json"
-	"fmt"
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/google/uuid"
@@ -62,8 +61,6 @@ func CheckFieldCreatePost(c *fiber.Ctx) error {
 	var checkFieldPostArray = []string{"id", "content"}
 	var post dto.Post
 	err := c.BodyParser(&post)
-
-	fmt.Println(post)
 
 	if (err != nil) ||
 		!utils.CheckFieldPost(post, checkFieldPostArray) {

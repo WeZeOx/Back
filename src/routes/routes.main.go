@@ -19,6 +19,7 @@ func setupRoutes(app *fiber.App) {
 
 	UsersRouters(app.Group("/api/users"))
 	PostsRouters(app.Group("/api/posts"))
+	CommentsRouters(app.Group("/api/comments"))
 }
 
 func Routes() {

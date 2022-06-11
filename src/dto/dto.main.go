@@ -17,6 +17,14 @@ type Login struct {
 	Password string `json:"password"`
 }
 
+type ContentCommentCreator struct {
+	UserId         string    `json:"user_id"`
+	PostId         string    `json:"post_id"`
+	CreatedAt      time.Time `json:"created_at_comment"`
+	ContentComment string    `json:"content_comment"`
+	CommentId      string    `json:"comment_id"`
+}
+
 type Claims struct {
 	ID      string `json:"id"`
 	IsAdmin bool   `json:"is_admin"`
