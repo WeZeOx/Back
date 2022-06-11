@@ -79,3 +79,13 @@ type Response struct {
 	User
 	State
 }
+
+type PostWithCommentResponse struct {
+	UserId         string    `json:"user_id"`
+	ContentComment string    `json:"content_comment"`
+	CreatedAt      time.Time `json:"created_at"`
+	Content        string    `json:"content"`
+	Like           string    `json:"like"`
+	Category       string    `json:"category"`
+	Username       string    `json:"username" gorm:"unique"`
+}

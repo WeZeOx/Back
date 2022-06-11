@@ -7,6 +7,6 @@ import (
 )
 
 func CommentsRouters(router fiber.Router) {
+	router.Get("/getpost/:postId", controller.GetSinglePostWithComments)
 	router.Post("/createcomment", middleware.CheckToken, middleware.DecodeToken, middleware.CheckFieldCreateComment, controller.CreateComment)
-
 }

@@ -46,6 +46,7 @@ func DeletePost(c *fiber.Ctx) error {
 
 func UnlikePost(c *fiber.Ctx) error {
 	var post dto.Post
+	var user dto.User
 	postId := c.Params("postId")
 	decodedToken := c.Locals("decodedToken").(*dto.Claims)
 
@@ -53,6 +54,8 @@ func UnlikePost(c *fiber.Ctx) error {
 	userId := decodedToken.ID
 	newLikeColumn := ""
 	userWhoLikeArr := strings.Split(post.Like, ",")
+
+	user = service.GetUserById(post.UserID, user)
 
 	for _, id := range userWhoLikeArr {
 		if id != userId {
@@ -63,36 +66,41 @@ func UnlikePost(c *fiber.Ctx) error {
 	post.Like = newLikeColumn
 	service.UpdateColumnLike(post)
 
-	return c.JSON(post)
+	return c.JSON(dto.PostUserResponseForFront{
+		UserID:       user.ID,
+		CreatedAt:    post.CreatedAt,
+		Username:     user.Username,
+		Content:      post.Content,
+		Like:         post.Like,
+		PostID:       post.PostID,
+		Categories:   post.Category,
+		Admin:        true,
+		NumberOfPost: 0,
+	})
 }
 
 func LikePost(c *fiber.Ctx) error {
 	var post dto.Post
+	var user dto.User
 	postId := c.Params("postId")
 	decodedToken := c.Locals("decodedToken").(*dto.Claims)
+
 	post = service.GetPostByPostId(postId, post)
+	user = service.GetUserById(post.UserID, user)
+
 	userId := decodedToken.ID
 	post.Like += userId + ","
 	service.UpdateColumnLike(post)
 
-	return c.JSON(post)
-}
-
-func GetSinglePost(c *fiber.Ctx) error {
-	var post dto.Post
-	postId := c.Params("postId")
-	post = service.GetPostByPostId(postId, post)
-
-	if post.PostID == "" {
-		return c.JSON(dto.State{
-			Message: "Post does not exist",
-			Auth:    false,
-			Token:   "",
-		})
-	} else {
-
-		res := service.GetPostWithComments(postId)
-
-		return c.JSON(res)
-	}
+	return c.JSON(dto.PostUserResponseForFront{
+		UserID:       user.ID,
+		CreatedAt:    post.CreatedAt,
+		Username:     user.Username,
+		Content:      post.Content,
+		Like:         post.Like,
+		PostID:       post.PostID,
+		Categories:   post.Category,
+		Admin:        true,
+		NumberOfPost: 0,
+	})
 }
