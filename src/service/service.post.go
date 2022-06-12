@@ -3,8 +3,15 @@ package service
 import (
 	"Forum-Back-End/src/database"
 	"Forum-Back-End/src/dto"
-	"sort"
 )
+
+func reverse(numbers []int) []int {
+	for i := 0; i < len(numbers)/2; i++ {
+		j := len(numbers) - i - 1
+		numbers[i], numbers[j] = numbers[j], numbers[i]
+	}
+	return numbers
+}
 
 func CreateDbPost(post dto.Post) {
 	database.Database.Db.Create(&post)
@@ -40,12 +47,17 @@ func UpdateColumnLike(post dto.Post) {
 	database.Database.Db.Where("post_id = ?", post.PostID).Save(&post)
 }
 
-func GetCountCommentByPost() []int {
+func GetCountCommentsByPost() []int {
 	var countResult []int
-	database.Database.Db.Table("posts p").Joins("LEFT JOIN comments c on p.post_id = c.post_id").Group("p.post_id").Select("count(c.post_id)").Order("p.created_at DESC").Scan(&countResult)
-	sort.Slice(countResult, func(i, j int) bool {
-		return true
-	})
+	database.Database.Db.Table("posts p").Joins("LEFT JOIN comments c on p.post_id = c.post_id").Group("p.post_id").Select("count(c.post_id)").Order("p.created_at ASC").Scan(&countResult)
+
+	return countResult
+}
+
+func GetCountCommentByPost(postId string) int {
+	var countResult int
+	database.Database.Db.Table("posts p").Joins("LEFT JOIN comments c on p.post_id = c.post_id").Group("p.post_id").Where("c.post_id = ?", postId).Select("count(c.post_id)").Scan(&countResult)
+
 	return countResult
 }
 

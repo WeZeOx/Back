@@ -30,7 +30,7 @@ func Routes() {
 
 	app.Get("/test", func(c *fiber.Ctx) error {
 		fmt.Println("la")
-		service.GetCountCommentByPost()
+		service.GetCountCommentsByPost()
 		return c.SendString("ma")
 	})
 

@@ -4,6 +4,7 @@ import (
 	"Forum-Back-End/src/dto"
 	"Forum-Back-End/src/service"
 	"Forum-Back-End/src/utils"
+	"fmt"
 	"github.com/gofiber/fiber/v2"
 	"github.com/joho/godotenv"
 	"os"
@@ -17,7 +18,7 @@ func GetPosts(c *fiber.Ctx) error {
 	_ = godotenv.Load(".env")
 	ADMIN_EMAIL := os.Getenv("ADMIN_EMAIL")
 	adminSchema := service.GetAdminUserByEmail(ADMIN_EMAIL)
-	arrCom := service.GetCountCommentByPost()
+	arrCom := service.GetCountCommentsByPost()
 
 	for idx, post := range posts {
 		isAdmin := adminSchema.ID == post.Post.UserID
@@ -49,6 +50,9 @@ func UnlikePost(c *fiber.Ctx) error {
 	var user dto.User
 	postId := c.Params("postId")
 	decodedToken := c.Locals("decodedToken").(*dto.Claims)
+	_ = godotenv.Load(".env")
+	ADMIN_EMAIL := os.Getenv("ADMIN_EMAIL")
+	adminSchema := service.GetAdminUserByEmail(ADMIN_EMAIL)
 
 	post = service.GetPostByPostId(postId, post)
 	userId := decodedToken.ID
@@ -65,6 +69,7 @@ func UnlikePost(c *fiber.Ctx) error {
 	newLikeColumn = newLikeColumn[:len(newLikeColumn)-1]
 	post.Like = newLikeColumn
 	service.UpdateColumnLike(post)
+	numberOfComment := service.GetCountCommentByPost(postId)
 
 	return c.JSON(dto.PostUserResponseForFront{
 		UserID:       user.ID,
@@ -74,8 +79,8 @@ func UnlikePost(c *fiber.Ctx) error {
 		Like:         post.Like,
 		PostID:       post.PostID,
 		Categories:   post.Category,
-		Admin:        true,
-		NumberOfPost: 0,
+		Admin:        adminSchema.ID == user.ID,
+		NumberOfPost: numberOfComment,
 	})
 }
 
@@ -85,8 +90,14 @@ func LikePost(c *fiber.Ctx) error {
 	postId := c.Params("postId")
 	decodedToken := c.Locals("decodedToken").(*dto.Claims)
 
+	_ = godotenv.Load(".env")
+	ADMIN_EMAIL := os.Getenv("ADMIN_EMAIL")
+	adminSchema := service.GetAdminUserByEmail(ADMIN_EMAIL)
+
 	post = service.GetPostByPostId(postId, post)
 	user = service.GetUserById(post.UserID, user)
+	numberOfComment := service.GetCountCommentByPost(postId)
+	fmt.Println(numberOfComment)
 
 	userId := decodedToken.ID
 	post.Like += userId + ","
@@ -100,7 +111,7 @@ func LikePost(c *fiber.Ctx) error {
 		Like:         post.Like,
 		PostID:       post.PostID,
 		Categories:   post.Category,
-		Admin:        true,
-		NumberOfPost: 0,
+		Admin:        adminSchema.ID == user.ID,
+		NumberOfPost: numberOfComment,
 	})
 }

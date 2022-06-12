@@ -45,9 +45,10 @@ func GetSinglePostWithComments(c *fiber.Ctx) error {
 				"admin":   adminSchema.ID == comment.UserId,
 			})
 		}
+		numberOfComment := service.GetCountCommentByPost(postId)
 
 		singlePost := service.FindPost(postId)
-		responseSinglePost := utils.CreateUserPostResponse(singlePost, adminSchema.ID == singlePost.UserID, 0)
+		responseSinglePost := utils.CreateUserPostResponse(singlePost, adminSchema.ID == singlePost.UserID, numberOfComment)
 
 		return c.JSON(test{
 			Comments: response,
