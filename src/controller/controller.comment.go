@@ -14,12 +14,7 @@ func CreateComment(c *fiber.Ctx) error {
 	token := c.Locals("decodedToken").(*dto.Claims)
 	comment.UserId = token.ID
 	service.CreateComment(comment)
-	return c.JSON(fiber.Map{"comment": comment, "isAdmin": token.IsAdmin})
-}
-
-type test struct {
-	Comments []fiber.Map
-	Post     dto.PostUserResponseForFront
+	return c.JSON(fiber.Map{"comment": comment, "isAdmin": token.IsAdmin, "username": token.Username})
 }
 
 func GetSinglePostWithComments(c *fiber.Ctx) error {
@@ -39,7 +34,9 @@ func GetSinglePostWithComments(c *fiber.Ctx) error {
 	} else {
 		comments := service.GetPostWithComments(postId)
 		var response []fiber.Map
+
 		for _, comment := range comments {
+
 			response = append(response, fiber.Map{
 				"comment": comment,
 				"admin":   adminSchema.ID == comment.UserId,
@@ -50,7 +47,7 @@ func GetSinglePostWithComments(c *fiber.Ctx) error {
 		singlePost := service.FindPost(postId)
 		responseSinglePost := utils.CreateUserPostResponse(singlePost, adminSchema.ID == singlePost.UserID, numberOfComment)
 
-		return c.JSON(test{
+		return c.JSON(dto.CommentsWithPost{
 			Comments: response,
 			Post:     responseSinglePost,
 		})

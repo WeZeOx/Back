@@ -14,8 +14,9 @@ func CreateToken(user dto.User, isAdmin bool) string {
 	mySigningKey := []byte(jwtSecret)
 
 	claims := dto.Claims{
-		ID:      user.ID,
-		IsAdmin: isAdmin,
+		ID:       user.ID,
+		Username: user.Username,
+		IsAdmin:  isAdmin,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour * 24 * 3)),
 		},

@@ -2,9 +2,9 @@ package controller
 
 import (
 	"Forum-Back-End/src/dto"
+	"Forum-Back-End/src/models"
 	"Forum-Back-End/src/service"
 	"Forum-Back-End/src/utils"
-	"fmt"
 	"github.com/gofiber/fiber/v2"
 	"github.com/joho/godotenv"
 	"os"
@@ -24,6 +24,8 @@ func GetPosts(c *fiber.Ctx) error {
 		isAdmin := adminSchema.ID == post.Post.UserID
 		res = append(res, utils.CreateUserPostResponse(post, isAdmin, arrCom[idx]))
 	}
+
+	//c.Set("content-encoding", "gzip")
 	return c.Status(fiber.StatusOK).JSON(res)
 }
 
@@ -37,8 +39,15 @@ func CreatePost(c *fiber.Ctx) error {
 
 func DeletePost(c *fiber.Ctx) error {
 	var post dto.Post
-	post.PostID = c.Params("postId")
+	var comment models.Comment
+	postId := c.Params("postId")
+
+	comment.PostId = postId
+	post.PostID = postId
+
 	service.DeletePost(post)
+
+	service.DeleteCommentWithPostId(postId, comment)
 
 	return c.JSON(fiber.Map{
 		"isOk": true,
@@ -66,6 +75,7 @@ func UnlikePost(c *fiber.Ctx) error {
 			newLikeColumn += id + ","
 		}
 	}
+
 	newLikeColumn = newLikeColumn[:len(newLikeColumn)-1]
 	post.Like = newLikeColumn
 	service.UpdateColumnLike(post)
@@ -97,9 +107,9 @@ func LikePost(c *fiber.Ctx) error {
 	post = service.GetPostByPostId(postId, post)
 	user = service.GetUserById(post.UserID, user)
 	numberOfComment := service.GetCountCommentByPost(postId)
-	fmt.Println(numberOfComment)
 
 	userId := decodedToken.ID
+
 	post.Like += userId + ","
 	service.UpdateColumnLike(post)
 

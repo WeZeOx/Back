@@ -2,6 +2,7 @@ package dto
 
 import (
 	"Forum-Back-End/src/models"
+	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v4"
 	"time"
 )
@@ -26,8 +27,9 @@ type ContentCommentCreator struct {
 }
 
 type Claims struct {
-	ID      string `json:"id"`
-	IsAdmin bool   `json:"is_admin"`
+	ID       string `json:"id"`
+	Username string `json:"username"`
+	IsAdmin  bool   `json:"is_admin"`
 	jwt.RegisteredClaims
 }
 
@@ -65,6 +67,11 @@ type PostUserResponseForFront struct {
 	NumberOfPost int       `json:"number_of_post"`
 }
 
+type CommentsWithPost struct {
+	Comments []fiber.Map
+	Post     PostUserResponseForFront
+}
+
 type Post struct {
 	UserID    string    `json:"id"`
 	CreatedAt time.Time `json:"created_at_post"`
@@ -84,8 +91,6 @@ type PostWithCommentResponse struct {
 	UserId         string    `json:"user_id"`
 	ContentComment string    `json:"content_comment"`
 	CreatedAt      time.Time `json:"created_at"`
-	Content        string    `json:"content"`
+	Username       string    `json:"username"`
 	Like           string    `json:"like"`
-	Category       string    `json:"category"`
-	Username       string    `json:"username" gorm:"unique"`
 }

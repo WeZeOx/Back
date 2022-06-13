@@ -3,15 +3,8 @@ package service
 import (
 	"Forum-Back-End/src/database"
 	"Forum-Back-End/src/dto"
+	"Forum-Back-End/src/models"
 )
-
-func reverse(numbers []int) []int {
-	for i := 0; i < len(numbers)/2; i++ {
-		j := len(numbers) - i - 1
-		numbers[i], numbers[j] = numbers[j], numbers[i]
-	}
-	return numbers
-}
 
 func CreateDbPost(post dto.Post) {
 	database.Database.Db.Create(&post)
@@ -19,13 +12,22 @@ func CreateDbPost(post dto.Post) {
 
 func FindPosts() []dto.ResponsePostUser {
 	var res []dto.ResponsePostUser
-	database.Database.Db.Table("users").Select("*").Joins("join posts p on users.id = p.user_id").Scan(&res)
+	database.Database.Db.
+		Table("users").
+		Select("*").
+		Joins("join posts p on users.id = p.user_id").
+		Scan(&res)
 	return res
 }
 
 func FindPost(postId string) dto.ResponsePostUser {
 	var res dto.ResponsePostUser
-	database.Database.Db.Table("users").Select("*").Joins("join posts p on users.id = p.user_id").Where("p.post_id = ?", postId).Scan(&res)
+	database.Database.Db.
+		Table("users").
+		Select("*").
+		Joins("join posts p on users.id = p.user_id").
+		Where("p.post_id = ?", postId).
+		Scan(&res)
 	return res
 }
 
@@ -40,29 +42,55 @@ func GetPostByPostId(id string, post dto.Post) dto.Post {
 }
 
 func DeletePost(post dto.Post) {
-	database.Database.Db.Where("post_id = ?", post.PostID).Delete(&post)
+	database.Database.Db.
+		Where("post_id = ?", post.PostID).
+		Delete(&post)
 }
 
 func UpdateColumnLike(post dto.Post) {
-	database.Database.Db.Where("post_id = ?", post.PostID).Save(&post)
+	database.Database.Db.
+		Where("post_id = ?", post.PostID).
+		Save(&post)
 }
 
 func GetCountCommentsByPost() []int {
 	var countResult []int
-	database.Database.Db.Table("posts p").Joins("LEFT JOIN comments c on p.post_id = c.post_id").Group("p.post_id").Select("count(c.post_id)").Order("p.created_at ASC").Scan(&countResult)
-
+	database.Database.Db.
+		Table("posts p").
+		Joins("LEFT JOIN comments c on p.post_id = c.post_id").
+		Group("p.post_id").Select("count(c.post_id)").
+		Order("p.created_at ASC").
+		Scan(&countResult)
 	return countResult
 }
 
 func GetCountCommentByPost(postId string) int {
 	var countResult int
-	database.Database.Db.Table("posts p").Joins("LEFT JOIN comments c on p.post_id = c.post_id").Group("p.post_id").Where("c.post_id = ?", postId).Select("count(c.post_id)").Scan(&countResult)
-
+	database.Database.Db.
+		Table("posts p").
+		Joins("LEFT JOIN comments c on p.post_id = c.post_id").
+		Group("p.post_id").
+		Where("c.post_id = ?", postId).
+		Select("count(c.post_id)").
+		Scan(&countResult)
 	return countResult
 }
 
 func GetPostWithComments(postId string) []dto.PostWithCommentResponse {
 	var responseDb []dto.PostWithCommentResponse
-	database.Database.Db.Table("comments c").Select("c.user_id, c.content_comment,p.content, p.created_at, p.like, p.category, u.username").Joins("join posts p on c.post_id = p.post_id join users u on u.id = c.user_id").Where("c.post_id = ?", postId).Scan(&responseDb)
+	database.Database.Db.
+		Table("comments c").
+		Select("c.user_id, c.content_comment, c.created_at, u.username, c.like").
+		Joins("join posts p on c.post_id = p.post_id join users u on u.id = c.user_id").
+		Order("c.created_at DESC").
+		Where("c.post_id = ?", postId).
+		Scan(&responseDb)
 	return responseDb
+}
+
+func DeleteCommentWithPostId(postId string, comment models.Comment) {
+	database.Database.Db.
+		Table("comments").
+		Where("comments.post_id", postId).
+		Delete(&comment)
 }

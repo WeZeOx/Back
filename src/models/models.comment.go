@@ -8,5 +8,6 @@ type Comment struct {
 	CommentId      string    `json:"comment_id"`
 	CreatedAt      time.Time `json:"created_at_comment"`
 	ContentComment string    `json:"content_comment"`
+	Like           string    `json:"like"`
 	User           User
 }
