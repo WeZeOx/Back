@@ -7,13 +7,13 @@ import (
 	"time"
 )
 
-type State struct {
+type ResponseState struct {
 	Message string `json:"message"`
 	Auth    bool   `json:"auth"`
 	Token   string `json:"token"`
 }
 
-type Login struct {
+type BodyLoginRequest struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`
 }
@@ -26,7 +26,7 @@ type ContentCommentCreator struct {
 	CommentId      string    `json:"comment_id"`
 }
 
-type Claims struct {
+type JwtClaims struct {
 	ID       string `json:"id"`
 	Username string `json:"username"`
 	IsAdmin  bool   `json:"is_admin"`
@@ -43,7 +43,7 @@ type User struct {
 	Post           []Post
 }
 
-type ResponseUser struct {
+type ResponseWithSafeField struct {
 	ID        string    `json:"id"`
 	CreatedAt time.Time `json:"created_at"`
 	Username  string    `json:"username"`
@@ -55,21 +55,21 @@ type ResponsePostUser struct {
 	models.Post
 }
 
-type PostUserResponseForFront struct {
-	UserID       string    `json:"user_id"`
-	CreatedAt    time.Time `json:"created_at"`
-	Username     string    `json:"username"`
-	Content      string    `json:"content"`
-	Like         string    `json:"like"`
-	PostID       string    `json:"post_id"`
-	Categories   string    `json:"categories"`
-	Admin        bool      `json:"admin"`
-	NumberOfPost int       `json:"number_of_post"`
+type PostModel struct {
+	UserID          string    `json:"user_id"`
+	CreatedAt       time.Time `json:"created_at"`
+	Username        string    `json:"username"`
+	Content         string    `json:"content"`
+	Like            string    `json:"like"`
+	PostID          string    `json:"post_id"`
+	Categories      string    `json:"categories"`
+	Admin           bool      `json:"admin"`
+	NumberOfComment int       `json:"number_of_comment"`
 }
 
 type CommentsWithPost struct {
 	Comments []fiber.Map
-	Post     PostUserResponseForFront
+	Post     PostModel
 }
 
 type Post struct {
@@ -80,11 +80,6 @@ type Post struct {
 	Dislike   string    `json:"dislike"`
 	Category  string    `json:"category"`
 	PostID    string    `json:"post_id"`
-}
-
-type Response struct {
-	User
-	State
 }
 
 type PostWithCommentResponse struct {

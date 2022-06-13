@@ -20,11 +20,11 @@ func DecodeToken(c *fiber.Ctx) error {
 	stringify, _ := json.Marshal(&tokenHeader)
 	json.Unmarshal(stringify, &AccessToken)
 
-	token, _ := jwt.ParseWithClaims(AccessToken["Raw"], &dto.Claims{}, func(token *jwt.Token) (interface{}, error) {
+	token, _ := jwt.ParseWithClaims(AccessToken["Raw"], &dto.JwtClaims{}, func(token *jwt.Token) (interface{}, error) {
 		return []byte(jwtSecret), nil
 	})
 
-	decodedToken := token.Claims.(*dto.Claims)
+	decodedToken := token.Claims.(*dto.JwtClaims)
 	c.Locals("decodedToken", decodedToken)
 
 	return c.Next()
@@ -35,22 +35,22 @@ func CheckToken(c *fiber.Ctx) error {
 	_ = godotenv.Load(".env")
 	jwtSecret := os.Getenv("JWT_SECRET")
 
-	token, err := jwt.ParseWithClaims(tokenString, &dto.Claims{}, func(token *jwt.Token) (interface{}, error) {
+	token, err := jwt.ParseWithClaims(tokenString, &dto.JwtClaims{}, func(token *jwt.Token) (interface{}, error) {
 		return []byte(jwtSecret), nil
 	})
 
 	if err != nil {
-		return c.Status(fiber.StatusUnauthorized).JSON(dto.State{
+		return c.Status(fiber.StatusUnauthorized).JSON(dto.ResponseState{
 			Message: "Wrong token",
 			Auth:    false,
 		})
 	}
 
-	if _, ok := token.Claims.(*dto.Claims); ok && token.Valid {
+	if _, ok := token.Claims.(*dto.JwtClaims); ok && token.Valid {
 		c.Locals("token", token)
 		return c.Next()
 	} else {
-		return c.Status(fiber.StatusUnauthorized).JSON(dto.State{
+		return c.Status(fiber.StatusUnauthorized).JSON(dto.ResponseState{
 			Message: "Wrong token",
 			Auth:    false,
 		})
@@ -64,7 +64,7 @@ func CheckFieldCreatePost(c *fiber.Ctx) error {
 
 	if (err != nil) ||
 		!utils.CheckFieldPost(post, checkFieldPostArray) {
-		return c.Status(fiber.StatusBadRequest).JSON(dto.State{
+		return c.Status(fiber.StatusBadRequest).JSON(dto.ResponseState{
 			Message: "Bad Fields",
 			Auth:    false,
 		})

@@ -15,7 +15,7 @@ func CheckFieldCreateComment(c *fiber.Ctx) error {
 
 	if (err != nil) ||
 		!utils.CheckFieldComment(comment, checkFieldPostArray) {
-		return c.Status(fiber.StatusBadRequest).JSON(dto.State{
+		return c.Status(fiber.StatusBadRequest).JSON(dto.ResponseState{
 			Message: "Bad Fields",
 			Auth:    false,
 		})

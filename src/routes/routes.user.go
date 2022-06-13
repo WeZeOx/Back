@@ -9,7 +9,6 @@ import (
 func UsersRouters(router fiber.Router) {
 	router.Post("/signup", middleware.CheckFieldCreateUser, controller.CreateUser)
 	router.Post("/signin", middleware.CheckFieldLogin, controller.LoginUser)
-	router.Get("/isadmin/", controller.UserIsAdmin)
-	router.Get("/all", controller.GetUsers)
-	router.Get("/:id", controller.GetUser)
+	router.Get("/isadmin", controller.UserIsAdmin)
+	router.Get("/:userId", controller.GetUser)
 }

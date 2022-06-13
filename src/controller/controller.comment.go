@@ -12,7 +12,7 @@ import (
 
 func CreateComment(c *fiber.Ctx) error {
 	comment := c.Locals("comment").(dto.ContentCommentCreator)
-	token := c.Locals("decodedToken").(*dto.Claims)
+	token := c.Locals("decodedToken").(*dto.JwtClaims)
 	comment.UserId = token.ID
 	service.CreateComment(comment)
 	return c.JSON(fiber.Map{"comment": comment, "isAdmin": token.IsAdmin, "username": token.Username})
@@ -23,11 +23,11 @@ func GetSinglePostWithComments(c *fiber.Ctx) error {
 	postId := c.Params("postId")
 	_ = godotenv.Load(".env")
 	ADMIN_EMAIL := os.Getenv("ADMIN_EMAIL")
-	adminSchema := service.GetAdminUserByEmail(ADMIN_EMAIL)
+	adminSchema := service.GetUserByEmail(ADMIN_EMAIL)
 	post = service.GetPostByPostId(postId, post)
 
 	if post.PostID == "" {
-		return c.JSON(dto.State{Message: "Post does not exist", Auth: false, Token: ""})
+		return c.JSON(dto.ResponseState{Message: "Post does not exist", Auth: false, Token: ""})
 	} else {
 		comments := service.GetPostWithComments(postId)
 		var response []fiber.Map
@@ -51,7 +51,7 @@ func GetSinglePostWithComments(c *fiber.Ctx) error {
 
 func LikeComment(c *fiber.Ctx) error {
 	commentId := c.Params("commentId")
-	decodedToken := c.Locals("decodedToken").(*dto.Claims)
+	decodedToken := c.Locals("decodedToken").(*dto.JwtClaims)
 	comment := service.GetCommentByCommentId(commentId)
 	comment.Like += decodedToken.ID + ","
 	service.SaveLikeColumn(comment)
@@ -60,7 +60,7 @@ func LikeComment(c *fiber.Ctx) error {
 
 func UnlikeComment(c *fiber.Ctx) error {
 	commentId := c.Params("commentId")
-	decodedToken := c.Locals("decodedToken").(*dto.Claims)
+	decodedToken := c.Locals("decodedToken").(*dto.JwtClaims)
 	comment := service.GetCommentByCommentId(commentId)
 	userWhoLikeArr := strings.Split(comment.Like, ",")
 	newLikeColumn := ""

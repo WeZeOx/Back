@@ -21,7 +21,7 @@ func CheckFieldUser(user dto.User, array []string) bool {
 	return true
 }
 
-func CheckFieldLogin(user dto.Login, array []string) bool {
+func CheckFieldLogin(user dto.BodyLoginRequest, array []string) bool {
 	var structArray map[string]interface{}
 	data, _ := json.Marshal(user)
 	err := json.Unmarshal(data, &structArray)

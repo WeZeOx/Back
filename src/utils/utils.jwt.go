@@ -8,12 +8,12 @@ import (
 	"time"
 )
 
-func CreateToken(user dto.User, isAdmin bool) string {
+func CreateJwtToken(user dto.User, isAdmin bool) string {
 	godotenv.Load(".env")
 	jwtSecret := os.Getenv("JWT_SECRET")
 	mySigningKey := []byte(jwtSecret)
 
-	claims := dto.Claims{
+	claims := dto.JwtClaims{
 		ID:       user.ID,
 		Username: user.Username,
 		IsAdmin:  isAdmin,
@@ -22,7 +22,7 @@ func CreateToken(user dto.User, isAdmin bool) string {
 		},
 	}
 
-	t := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	token, _ := t.SignedString(mySigningKey)
+	tk := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	token, _ := tk.SignedString(mySigningKey)
 	return token
 }
