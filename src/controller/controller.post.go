@@ -66,8 +66,8 @@ func UnlikePost(c *fiber.Ctx) error {
 	post = service.GetPostByPostId(postId, post)
 	userId := decodedToken.ID
 	newLikeColumn := ""
-	userWhoLikeArr := strings.Split(post.Like, ",")
 
+	userWhoLikeArr := strings.Split(post.Like, ",")
 	user = service.GetUserById(post.UserID, user)
 
 	for _, id := range userWhoLikeArr {
@@ -107,7 +107,6 @@ func LikePost(c *fiber.Ctx) error {
 	post = service.GetPostByPostId(postId, post)
 	user = service.GetUserById(post.UserID, user)
 	numberOfComment := service.GetCountCommentByPost(postId)
-
 	userId := decodedToken.ID
 
 	post.Like += userId + ","

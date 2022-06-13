@@ -80,7 +80,7 @@ func GetPostWithComments(postId string) []dto.PostWithCommentResponse {
 	var responseDb []dto.PostWithCommentResponse
 	database.Database.Db.
 		Table("comments c").
-		Select("c.user_id, c.content_comment, c.created_at, u.username, c.like").
+		Select("c.user_id, c.content_comment, c.created_at, u.username, c.like, c.comment_id").
 		Joins("join posts p on c.post_id = p.post_id join users u on u.id = c.user_id").
 		Order("c.created_at DESC").
 		Where("c.post_id = ?", postId).

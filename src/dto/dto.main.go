@@ -93,4 +93,5 @@ type PostWithCommentResponse struct {
 	CreatedAt      time.Time `json:"created_at"`
 	Username       string    `json:"username"`
 	Like           string    `json:"like"`
+	CommentId      string    `json:"comment_id"`
 }
