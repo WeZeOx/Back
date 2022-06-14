@@ -15,7 +15,9 @@ func FindPosts() []dto.ResponsePostUser {
 	database.Database.Db.
 		Table("users").
 		Select("*").
-		Joins("join posts p on users.id = p.user_id").
+		Joins("join posts p on p.user_id").
+		Group("p.post_id").
+		Order("p.created_at ASC").
 		Scan(&res)
 	return res
 }

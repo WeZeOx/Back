@@ -15,7 +15,7 @@ func CreateComment(c *fiber.Ctx) error {
 	token := c.Locals("decodedToken").(*dto.JwtClaims)
 	comment.UserId = token.ID
 	service.CreateComment(comment)
-	return c.JSON(fiber.Map{"comment": comment, "isAdmin": token.IsAdmin, "username": token.Username})
+	return c.JSON(fiber.Map{"comment": utils.CreateCommentResponse(comment, token.Username), "admin": token.IsAdmin})
 }
 
 func GetSinglePostWithComments(c *fiber.Ctx) error {
@@ -59,22 +59,26 @@ func LikeComment(c *fiber.Ctx) error {
 }
 
 func UnlikeComment(c *fiber.Ctx) error {
+	var newLikeColumn string
 	commentId := c.Params("commentId")
 	decodedToken := c.Locals("decodedToken").(*dto.JwtClaims)
 	comment := service.GetCommentByCommentId(commentId)
 	userWhoLikeArr := strings.Split(comment.Like, ",")
-	newLikeColumn := ""
 
 	for _, id := range userWhoLikeArr {
 		if id != decodedToken.ID {
 			newLikeColumn += id + ","
 		}
 	}
-
 	newLikeColumn = newLikeColumn[:len(newLikeColumn)-1]
 	comment.Like = newLikeColumn
-
 	service.SaveLikeColumn(comment)
 
 	return c.SendString("")
+}
+
+func DeleteComment(c *fiber.Ctx) error {
+	commentId := c.Params("commentId")
+	service.DeleteComment(commentId)
+	return c.JSON(fiber.Map{"successfully": true})
 }

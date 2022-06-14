@@ -19,11 +19,11 @@ func CreateUser(c *fiber.Ctx) error {
 	service.CreateUserInDb(user)
 	token := utils.CreateJwtToken(userData, userData.Email == ADMIN_EMAIL)
 
-	return c.Status(200).JSON(utils.CreateSuccessfulLoginResponse(user, token, "Authorized", userData.Email == ADMIN_EMAIL))
+	return c.Status(200).JSON(utils.CreateSuccessfulLoginResponse(user, token, "Authorized", true))
 }
 
 func LoginUser(c *fiber.Ctx) error {
-	godotenv.Load(".env")
+	_ = godotenv.Load(".env")
 	userData := c.Locals("user").(dto.BodyLoginRequest)
 	userToLogin := service.GetUserByEmail(userData.Email)
 	user := utils.CreateDbUserSchema(userToLogin)
@@ -44,7 +44,7 @@ func LoginUser(c *fiber.Ctx) error {
 }
 
 func GetUser(c *fiber.Ctx) error {
-	godotenv.Load(".env")
+	_ = godotenv.Load(".env")
 	ADMIN_EMAIL := os.Getenv("ADMIN_EMAIL")
 	id := c.Params("userId")
 	var user dto.User
@@ -67,7 +67,7 @@ func GetUser(c *fiber.Ctx) error {
 
 func UserIsAdmin(c *fiber.Ctx) error {
 	tokenString := c.GetReqHeaders()["Authorization"]
-	godotenv.Load(".env")
+	_ = godotenv.Load(".env")
 	jwtSecret := os.Getenv("JWT_SECRET")
 
 	token, err := jwt.ParseWithClaims(tokenString, &dto.JwtClaims{}, func(token *jwt.Token) (interface{}, error) {

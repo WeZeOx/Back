@@ -90,3 +90,12 @@ type PostWithCommentResponse struct {
 	Like           string    `json:"like"`
 	CommentId      string    `json:"comment_id"`
 }
+
+type ResponseComment struct {
+	UserId         string    `json:"user_id"`
+	ContentComment string    `json:"content_comment"`
+	CreatedAt      time.Time `json:"created_at"`
+	Username       string    `json:"username"`
+	Like           string    `json:"like"`
+	CommentId      string    `json:"comment_id"`
+}

@@ -13,12 +13,12 @@ import (
 
 func DecodeToken(c *fiber.Ctx) error {
 	tokenHeader := c.Locals("token").(*jwt.Token)
-	godotenv.Load(".env")
+	_ = godotenv.Load(".env")
 	jwtSecret := os.Getenv("JWT_SECRET")
 
 	var AccessToken map[string]string
 	stringify, _ := json.Marshal(&tokenHeader)
-	json.Unmarshal(stringify, &AccessToken)
+	_ = json.Unmarshal(stringify, &AccessToken)
 
 	token, _ := jwt.ParseWithClaims(AccessToken["Raw"], &dto.JwtClaims{}, func(token *jwt.Token) (interface{}, error) {
 		return []byte(jwtSecret), nil

@@ -30,11 +30,11 @@ func CreateUserPostResponse(postData dto.ResponsePostUser, isAdmin bool, num int
 	}
 }
 
-func CreatePostResponse(post dto.Post, user dto.User, isAdmin bool, numberOfComment int) dto.PostModel {
+func CreatePostResponse(post dto.Post, username, userId string, isAdmin bool, numberOfComment int) dto.PostModel {
 	return dto.PostModel{
-		UserID:          user.ID,
+		UserID:          userId,
 		CreatedAt:       post.CreatedAt,
-		Username:        user.Username,
+		Username:        username,
 		Content:         post.Content,
 		Like:            post.Like,
 		PostID:          post.PostID,
@@ -56,4 +56,15 @@ func CreateSuccessfulLoginResponse(user models.User, token, message string, auth
 			Auth:    auth,
 			Token:   token,
 		}}
+}
+
+func CreateCommentResponse(comment dto.ContentCommentCreator, username string) dto.ResponseComment {
+	return dto.ResponseComment{
+		UserId:         comment.UserId,
+		ContentComment: comment.ContentComment,
+		CreatedAt:      comment.CreatedAt,
+		Username:       username,
+		Like:           "",
+		CommentId:      comment.CommentId,
+	}
 }

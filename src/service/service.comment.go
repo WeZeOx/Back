@@ -24,3 +24,12 @@ func SaveLikeColumn(comment models.Comment) {
 		Where("comment_id = ?", comment.CommentId).
 		Save(&comment)
 }
+
+func DeleteComment(commentId string) {
+	var comment models.Comment
+	comment.CommentId = commentId
+	database.Database.Db.
+		Table("comments").
+		Where("comment_id = ?", commentId).
+		Delete(&comment)
+}

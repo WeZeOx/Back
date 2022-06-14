@@ -30,10 +30,11 @@ func GetPosts(c *fiber.Ctx) error {
 
 func CreatePost(c *fiber.Ctx) error {
 	postData := c.Locals("post").(dto.Post)
-	token := c.Locals("decodedToken").(*dto.JwtClaims)
+	decodedToken := c.Locals("decodedToken").(*dto.JwtClaims)
 	postData.CreatedAt = time.Now()
 	service.CreateDbPost(postData)
-	return c.JSON(fiber.Map{"post": postData, "admin": token.IsAdmin})
+
+	return c.JSON(utils.CreatePostResponse(postData, decodedToken.Username, decodedToken.ID, decodedToken.IsAdmin, 0))
 }
 
 func DeletePost(c *fiber.Ctx) error {
@@ -54,7 +55,6 @@ func DeletePost(c *fiber.Ctx) error {
 
 func UnlikePost(c *fiber.Ctx) error {
 	var post dto.Post
-	var user dto.User
 	var newLikeColumn string
 	postId := c.Params("postId")
 	decodedToken := c.Locals("decodedToken").(*dto.JwtClaims)
@@ -63,13 +63,11 @@ func UnlikePost(c *fiber.Ctx) error {
 	adminSchema := service.GetUserByEmail(ADMIN_EMAIL)
 
 	post = service.GetPostByPostId(postId, post)
-	userId := decodedToken.ID
 
 	userWhoLikeArr := strings.Split(post.Like, ",")
-	user = service.GetUserById(post.UserID, user)
 
 	for _, id := range userWhoLikeArr {
-		if id != userId {
+		if id != decodedToken.ID {
 			newLikeColumn += id + ","
 		}
 	}
@@ -78,14 +76,13 @@ func UnlikePost(c *fiber.Ctx) error {
 	post.Like = newLikeColumn
 	service.UpdateColumnLike(post)
 	numberOfComment := service.GetCountCommentByPost(postId)
-	isAdmin := adminSchema.ID == userId
+	isAdmin := adminSchema.ID == decodedToken.ID
 
-	return c.JSON(utils.CreatePostResponse(post, user, isAdmin, numberOfComment))
+	return c.JSON(utils.CreatePostResponse(post, decodedToken.Username, decodedToken.ID, isAdmin, numberOfComment))
 }
 
 func LikePost(c *fiber.Ctx) error {
 	var post dto.Post
-	var user dto.User
 	postId := c.Params("postId")
 	decodedToken := c.Locals("decodedToken").(*dto.JwtClaims)
 
@@ -94,7 +91,6 @@ func LikePost(c *fiber.Ctx) error {
 
 	adminSchema := service.GetUserByEmail(ADMIN_EMAIL)
 	post = service.GetPostByPostId(postId, post)
-	user = service.GetUserById(post.UserID, user)
 
 	numberOfComment := service.GetCountCommentByPost(postId)
 	userId := decodedToken.ID
@@ -103,5 +99,5 @@ func LikePost(c *fiber.Ctx) error {
 	service.UpdateColumnLike(post)
 	isAdmin := adminSchema.ID == userId
 
-	return c.JSON(utils.CreatePostResponse(post, user, isAdmin, numberOfComment))
+	return c.JSON(utils.CreatePostResponse(post, decodedToken.Username, decodedToken.ID, isAdmin, numberOfComment))
 }
