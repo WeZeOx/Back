@@ -3,6 +3,9 @@ package utils
 import (
 	"Forum-Back-End/src/dto"
 	"encoding/json"
+	"fmt"
+	"github.com/joho/godotenv"
+	"os"
 )
 
 func CheckFieldUser(user dto.User, array []string) bool {
@@ -66,4 +69,12 @@ func CheckFieldComment(user dto.ContentCommentCreator, array []string) bool {
 		}
 	}
 	return true
+}
+
+func OpenDotEnvAndQueryTheValue(key string) string {
+	err := godotenv.Load(".env")
+	if err != nil {
+		fmt.Println(err, "\nPlease check the \".env\" / \".env.example\" file an check if all the field are full")
+	}
+	return os.Getenv(key)
 }

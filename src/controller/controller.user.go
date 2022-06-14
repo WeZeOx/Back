@@ -6,14 +6,11 @@ import (
 	"Forum-Back-End/src/utils"
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v4"
-	"github.com/joho/godotenv"
-	"os"
 )
 
 func CreateUser(c *fiber.Ctx) error {
 	userData := c.Locals("user").(dto.User)
-	_ = godotenv.Load(".env")
-	ADMIN_EMAIL := os.Getenv("ADMIN_EMAIL")
+	ADMIN_EMAIL := utils.OpenDotEnvAndQueryTheValue("ADMIN_EMAIL")
 
 	user := utils.CreateDbUserSchema(userData)
 	service.CreateUserInDb(user)
@@ -23,12 +20,11 @@ func CreateUser(c *fiber.Ctx) error {
 }
 
 func LoginUser(c *fiber.Ctx) error {
-	_ = godotenv.Load(".env")
 	userData := c.Locals("user").(dto.BodyLoginRequest)
 	userToLogin := service.GetUserByEmail(userData.Email)
 	user := utils.CreateDbUserSchema(userToLogin)
-	ADMIN_EMAIL := os.Getenv("ADMIN_EMAIL")
-	ADMIN_PASSWORD := os.Getenv("ADMIN_PASSWORD")
+	ADMIN_EMAIL := utils.OpenDotEnvAndQueryTheValue("ADMIN_EMAIL")
+	ADMIN_PASSWORD := utils.OpenDotEnvAndQueryTheValue("ADMIN_PASSWORD")
 
 	if utils.CheckPasswordHash(userData.Password, userToLogin.Password) &&
 		userData.Password == ADMIN_PASSWORD &&
@@ -44,8 +40,8 @@ func LoginUser(c *fiber.Ctx) error {
 }
 
 func GetUser(c *fiber.Ctx) error {
-	_ = godotenv.Load(".env")
-	ADMIN_EMAIL := os.Getenv("ADMIN_EMAIL")
+	ADMIN_EMAIL := utils.OpenDotEnvAndQueryTheValue("ADMIN_EMAIL")
+
 	id := c.Params("userId")
 	var user dto.User
 	var post []dto.Post
@@ -67,8 +63,7 @@ func GetUser(c *fiber.Ctx) error {
 
 func UserIsAdmin(c *fiber.Ctx) error {
 	tokenString := c.GetReqHeaders()["Authorization"]
-	_ = godotenv.Load(".env")
-	jwtSecret := os.Getenv("JWT_SECRET")
+	jwtSecret := utils.OpenDotEnvAndQueryTheValue("JWT_SECRET")
 
 	token, err := jwt.ParseWithClaims(tokenString, &dto.JwtClaims{}, func(token *jwt.Token) (interface{}, error) {
 		return []byte(jwtSecret), nil

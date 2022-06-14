@@ -7,8 +7,6 @@ import (
 	"Forum-Back-End/src/utils"
 	"fmt"
 	"github.com/google/uuid"
-	"github.com/joho/godotenv"
-	"os"
 	"time"
 )
 
@@ -40,11 +38,10 @@ func UsernameExist(user dto.User) bool {
 }
 
 func AccountAdminExist() bool {
-	godotenv.Load(".env")
 	var user dto.User
-
-	ADMIN_EMAIL := os.Getenv("ADMIN_EMAIL")
-	ADMIN_PASSWORD_HASH, _ := utils.HashPassword(os.Getenv("ADMIN_PASSWORD"))
+	ADMIN_EMAIL := utils.OpenDotEnvAndQueryTheValue("ADMIN_EMAIL")
+	ADMIN_PASSWORD := utils.OpenDotEnvAndQueryTheValue("ADMIN_PASSWORD")
+	ADMIN_PASSWORD_HASH, _ := utils.HashPassword(ADMIN_PASSWORD)
 	user.Email = ADMIN_EMAIL
 
 	if EmailExist(user) {

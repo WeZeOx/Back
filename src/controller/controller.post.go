@@ -6,8 +6,6 @@ import (
 	"Forum-Back-End/src/service"
 	"Forum-Back-End/src/utils"
 	"github.com/gofiber/fiber/v2"
-	"github.com/joho/godotenv"
-	"os"
 	"strings"
 	"time"
 )
@@ -15,8 +13,7 @@ import (
 func GetPosts(c *fiber.Ctx) error {
 	posts := service.FindPosts()
 	var res []dto.PostModel
-	_ = godotenv.Load(".env")
-	ADMIN_EMAIL := os.Getenv("ADMIN_EMAIL")
+	ADMIN_EMAIL := utils.OpenDotEnvAndQueryTheValue("ADMIN_EMAIL")
 	adminSchema := service.GetUserByEmail(ADMIN_EMAIL)
 	arrCom := service.GetCountCommentsByPost()
 
@@ -58,8 +55,8 @@ func UnlikePost(c *fiber.Ctx) error {
 	var newLikeColumn string
 	postId := c.Params("postId")
 	decodedToken := c.Locals("decodedToken").(*dto.JwtClaims)
-	_ = godotenv.Load(".env")
-	ADMIN_EMAIL := os.Getenv("ADMIN_EMAIL")
+
+	ADMIN_EMAIL := utils.OpenDotEnvAndQueryTheValue("ADMIN_EMAIL")
 	adminSchema := service.GetUserByEmail(ADMIN_EMAIL)
 
 	post = service.GetPostByPostId(postId, post)
@@ -85,13 +82,10 @@ func LikePost(c *fiber.Ctx) error {
 	var post dto.Post
 	postId := c.Params("postId")
 	decodedToken := c.Locals("decodedToken").(*dto.JwtClaims)
-
-	_ = godotenv.Load(".env")
-	ADMIN_EMAIL := os.Getenv("ADMIN_EMAIL")
+	ADMIN_EMAIL := utils.OpenDotEnvAndQueryTheValue("ADMIN_EMAIL")
 
 	adminSchema := service.GetUserByEmail(ADMIN_EMAIL)
 	post = service.GetPostByPostId(postId, post)
-
 	numberOfComment := service.GetCountCommentByPost(postId)
 	userId := decodedToken.ID
 

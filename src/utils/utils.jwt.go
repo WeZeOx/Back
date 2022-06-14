@@ -3,14 +3,12 @@ package utils
 import (
 	"Forum-Back-End/src/dto"
 	"github.com/golang-jwt/jwt/v4"
-	"github.com/joho/godotenv"
-	"os"
+	_ "github.com/joho/godotenv"
 	"time"
 )
 
 func CreateJwtToken(user dto.User, isAdmin bool) string {
-	godotenv.Load(".env")
-	jwtSecret := os.Getenv("JWT_SECRET")
+	jwtSecret := OpenDotEnvAndQueryTheValue("JWT_SECRET")
 	mySigningKey := []byte(jwtSecret)
 
 	claims := dto.JwtClaims{

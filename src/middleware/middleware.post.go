@@ -7,14 +7,11 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/google/uuid"
-	"github.com/joho/godotenv"
-	"os"
 )
 
 func DecodeToken(c *fiber.Ctx) error {
 	tokenHeader := c.Locals("token").(*jwt.Token)
-	_ = godotenv.Load(".env")
-	jwtSecret := os.Getenv("JWT_SECRET")
+	jwtSecret := utils.OpenDotEnvAndQueryTheValue("JWT_SECRET")
 
 	var AccessToken map[string]string
 	stringify, _ := json.Marshal(&tokenHeader)
@@ -32,9 +29,8 @@ func DecodeToken(c *fiber.Ctx) error {
 
 func CheckToken(c *fiber.Ctx) error {
 	tokenString := c.GetReqHeaders()["Authorization"]
-	_ = godotenv.Load(".env")
-	jwtSecret := os.Getenv("JWT_SECRET")
 
+	jwtSecret := utils.OpenDotEnvAndQueryTheValue("JWT_SECRET")
 	token, err := jwt.ParseWithClaims(tokenString, &dto.JwtClaims{}, func(token *jwt.Token) (interface{}, error) {
 		return []byte(jwtSecret), nil
 	})

@@ -5,8 +5,6 @@ import (
 	"Forum-Back-End/src/service"
 	"Forum-Back-End/src/utils"
 	"github.com/gofiber/fiber/v2"
-	"github.com/joho/godotenv"
-	"os"
 	"strings"
 )
 
@@ -21,8 +19,8 @@ func CreateComment(c *fiber.Ctx) error {
 func GetSinglePostWithComments(c *fiber.Ctx) error {
 	var post dto.Post
 	postId := c.Params("postId")
-	_ = godotenv.Load(".env")
-	ADMIN_EMAIL := os.Getenv("ADMIN_EMAIL")
+	ADMIN_EMAIL := utils.OpenDotEnvAndQueryTheValue("ADMIN_EMAIL")
+
 	adminSchema := service.GetUserByEmail(ADMIN_EMAIL)
 	post = service.GetPostByPostId(postId, post)
 
