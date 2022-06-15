@@ -2,12 +2,11 @@ FROM golang:1.17-alpine
 
 WORKDIR /app
 
-COPY go.mod ./
-COPY go.sum ./
+
+COPY . .
 RUN go mod download
 
-COPY *.go ./
 
-RUN go build -o /docker-gs-ping
 
-ENTRYPOINT ["/docker-gs-ping"]
+RUN go build -o back.exe .
+CMD [ "./back.exe" ]
