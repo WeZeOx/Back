@@ -6,8 +6,8 @@ COPY go.mod ./
 COPY go.sum ./
 RUN go mod download
 
-COPY Back/**/*.go ./
+COPY *.go ./
 
-RUN go build -o back.exe .
+RUN go build -o /docker-gs-ping
 
-CMD [ "./back.exe" ]
+ENTRYPOINT ["/docker-gs-ping"]
