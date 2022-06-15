@@ -1,5 +1,6 @@
 FROM golang:1.17-alpine
 RUN apk add gcc
+RUN apk add musl-dev
 
 WORKDIR /app
 
