@@ -1,7 +1,7 @@
 FROM golang:1.17-alpine
+RUN apk add gcc
 
 WORKDIR /app
-
 
 COPY . .
 RUN go mod download
